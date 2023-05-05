@@ -1,0 +1,12 @@
+spring:
+  cloud:
+    nacos:
+      username: nacos
+      password: nacos
+      context-path: /nacos
+      config:
+        namespace: dataset-annotation
+        server-addr: localhost:8848
+      discovery:
+        namespace: dataset-annotation
+        server-addr: localhost:8848
