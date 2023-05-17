@@ -1,30 +1,13 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
+
 package org.dubhe.admin.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.dubhe.admin.domain.dto.*;
 import org.dubhe.admin.domain.entity.User;
-import org.dubhe.admin.domain.vo.UserConfigCreateVO;
-import org.dubhe.admin.domain.vo.UserConfigVO;
-import org.dubhe.biz.base.dto.TeamDTO;
 import org.dubhe.biz.base.dto.UserDTO;
 import org.dubhe.biz.base.vo.DataResponseBody;
+import org.dubhe.biz.db.utils.PageDTO;
 import org.dubhe.cloud.authconfig.service.AdminUserService;
 import org.springframework.security.core.Authentication;
 
@@ -67,16 +50,11 @@ public interface UserService extends AdminUserService, IService<User> {
 
     /**
      * 批量删除用户信息
-     *
-     * @param ids 用户ID列表
      */
     void delete(Set<Long> ids);
 
     /**
      * 根据用户名称获取用户信息
-     *
-     * @param userName 用户名称
-     * @return org.dubhe.domain.dto.UserDTO 用户信息返回实例
      */
     UserDTO findByName(String userName);
 
@@ -112,7 +90,7 @@ public interface UserService extends AdminUserService, IService<User> {
      * @param page     分页请求实体
      * @return java.lang.Object 用户列表返回实例
      */
-    Object queryAll(UserQueryDTO criteria, Page page);
+    PageDTO<UserDTO> queryAll(UserQueryDTO criteria, Page page);
 
     /**
      * 查询用户列表
@@ -121,14 +99,6 @@ public interface UserService extends AdminUserService, IService<User> {
      * @return java.util.List<org.dubhe.domain.dto.UserDTO> 用户列表返回实例
      */
     List<UserDTO> queryAll(UserQueryDTO criteria);
-
-    /**
-     * 根据用户ID查询团队列表
-     *
-     * @param userId 用户ID
-     * @return java.util.List<org.dubhe.domain.dto.TeamDTO> 团队列表信息
-     */
-    List<TeamDTO> queryTeams(Long userId);
 
     /**
      * 导出数据
@@ -160,7 +130,7 @@ public interface UserService extends AdminUserService, IService<User> {
      * @param userRegisterDTO 用户注册请求实体
      * @return org.dubhe.base.DataResponseBody 注册返回结果集
      */
-    DataResponseBody userRegister(UserRegisterDTO userRegisterDTO);
+    void userRegister(UserRegisterDTO userRegisterDTO);
 
 
     /**
@@ -169,7 +139,7 @@ public interface UserService extends AdminUserService, IService<User> {
      * @param userRegisterMailDTO 用户发送邮件请求实体
      * @return org.dubhe.base.DataResponseBody 发送邮件返回结果集
      */
-    DataResponseBody getCodeBySentEmail(UserRegisterMailDTO userRegisterMailDTO);
+    void getCodeBySentEmail(UserRegisterMailDTO userRegisterMailDTO);
 
 
     /**
@@ -178,14 +148,7 @@ public interface UserService extends AdminUserService, IService<User> {
      * @param userEmailUpdateDTO 修改邮箱请求实体
      * @return org.dubhe.base.DataResponseBody 修改邮箱返回结果集
      */
-    DataResponseBody resetEmail(UserEmailUpdateDTO userEmailUpdateDTO);
-
-    /**
-     * 获取用户信息
-     *
-     * @return java.util.Map<java.lang.String, java.lang.Object> 用户信息结果集
-     */
-    Map<String, Object> userinfo();
+    void resetEmail(UserEmailUpdateDTO userEmailUpdateDTO);
 
     /**
      * 密码重置接口
@@ -193,46 +156,24 @@ public interface UserService extends AdminUserService, IService<User> {
      * @param userResetPasswordDTO 密码修改请求参数
      * @return org.dubhe.base.DataResponseBody 密码修改结果集
      */
-    DataResponseBody resetPassword(UserResetPasswordDTO userResetPasswordDTO);
+    void resetPassword(UserResetPasswordDTO userResetPasswordDTO);
 
     /**
      * 登录
      *
-     * @param authUserDTO 登录请求实体
+     * @param authUserLoginDTO 登录请求实体
      */
-    DataResponseBody<Map<String, Object>> login(AuthUserDTO authUserDTO);
-
-    /**
-     * 退出登录
-     *
-     * @param accessToken token
-     */
-    DataResponseBody logout(String accessToken);
+    AuthUserLoginResultDTO login(AuthUserLoginDTO authUserLoginDTO);
 
     /**
      * 根据用户昵称获取用户信息
-     *
-     * @param nickName 用户昵称
-     * @return org.dubhe.domain.dto.UserDTO 用户信息DTO集合
      */
     List<UserDTO> findByNickName(String nickName);
 
     /**
      * 根据用户id批量查询用户信息
-     *
-     * @param ids 用户id集合
-     * @return org.dubhe.domain.dto.UserDTO 用户信息DTO集合
      */
     List<UserDTO> getUserList(List<Long> ids);
 
-    /**
-     * 根据用户 ID 查询用户配置
-     *
-     * @param userId 用户 ID
-     * @return org.dubhe.admin.domain.vo.UserConfigVO 用户配置 VO
-     */
-    UserConfigVO findUserConfig(Long userId);
 
-
-    String encryptUserForVis(Authentication authentication);
 }

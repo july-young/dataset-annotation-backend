@@ -1,19 +1,4 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
+
 
 package org.dubhe.data.service;
 
@@ -21,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.dubhe.biz.base.enums.OperationTypeEnum;
 import org.dubhe.biz.base.vo.DatasetVO;
+import org.dubhe.biz.db.utils.PageDTO;
 import org.dubhe.data.constant.DatasetLabelEnum;
 import org.dubhe.biz.base.vo.ProgressVO;
 import org.dubhe.data.domain.dto.*;
@@ -33,6 +19,7 @@ import org.dubhe.data.machine.enums.DataStateEnum;
 import org.dubhe.recycle.domain.dto.RecycleCreateDTO;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -67,20 +54,13 @@ public interface DatasetService {
 
     /**
      * 创建数据集
-     *
-     * @param datasetCreateDTO 数据集信息
-     * @return Long 数据集id
      */
     Long create(DatasetCreateDTO datasetCreateDTO);
 
     /**
      * 数据集查询
-     *
-     * @param page            分页信息
-     * @param datasetQueryDTO 查询条件
-     * @return MapMap<String, Object> 查询出对应的数据集
      */
-    Map<String, Object> listVO(Page<Dataset> page, DatasetQueryDTO datasetQueryDTO);
+    PageDTO<DatasetVO> page(Page<Dataset> page, DatasetQueryDTO datasetQueryDTO);
 
     /**
      * 获取数据集详情
@@ -101,10 +81,10 @@ public interface DatasetService {
 
     /**
      * 删除数据集
-     *
-     * @param datasetDeleteDTO 删除数据集条件
      */
-    void delete(DatasetDeleteDTO datasetDeleteDTO);
+    void delete(Long id);
+
+    void delete(Collection<Long> ids);
 
     /**
      * 数据集下载
@@ -121,7 +101,7 @@ public interface DatasetService {
      * @param datasetIsVersionDTO 查询数据集(有版本)条件
      * @return Map<String, Object> 查询数据集(有版本)列表
      */
-    Map<String, Object> dataVersionListVO(Page<Dataset> page, DatasetIsVersionDTO datasetIsVersionDTO);
+    PageDTO dataVersionListVO(Page<Dataset> page, DatasetIsVersionDTO datasetIsVersionDTO);
 
     /**
      * 数据扩容

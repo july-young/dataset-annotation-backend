@@ -2,3 +2,6 @@
 jwt:
   # 在线用户key
   online-key: online-token
+
+logging:
+  config: classpath:logback-spring.xml

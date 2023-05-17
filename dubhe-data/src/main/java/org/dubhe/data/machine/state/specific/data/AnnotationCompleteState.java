@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
 package org.dubhe.data.machine.state.specific.data;
 
 import org.dubhe.biz.log.enums.LogEnum;
@@ -53,10 +37,10 @@ public class AnnotationCompleteState extends AbstractDataState {
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void uploadSavePicturesEvent(Integer primaryKeyId) {
+    public void uploadSavePicturesEvent(Long primaryKeyId) {
         LogUtil.debug(LogEnum.STATE_MACHINE, " 【标注完成】 执行事件前内存中状态机的状态 :{} ", dataStateMachine.getMemoryDataState());
         LogUtil.debug(LogEnum.STATE_MACHINE, " 接受参数： {} ", primaryKeyId);
-        datasetMapper.updateStatus(Long.valueOf(primaryKeyId), DataStateEnum.MANUAL_ANNOTATION_STATE.getCode());
+        datasetMapper.updateStatus(primaryKeyId, DataStateEnum.MANUAL_ANNOTATION_STATE.getCode());
         dataStateMachine.setMemoryDataState(dataStateMachine.getManualAnnotationState());
         LogUtil.debug(LogEnum.STATE_MACHINE, " 【标注完成】 执行事件后内存状态机的切换： {}", dataStateMachine.getMemoryDataState());
     }
@@ -67,7 +51,7 @@ public class AnnotationCompleteState extends AbstractDataState {
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void completeStrengthenEvent(Integer primaryKeyId) {
+    public void completeStrengthenEvent(Long primaryKeyId) {
         LogUtil.debug(LogEnum.STATE_MACHINE, " 【标注完成】 执行事件前内存中状态机的状态 :{} ", dataStateMachine.getMemoryDataState());
         LogUtil.debug(LogEnum.STATE_MACHINE, " 接受参数： {} ", primaryKeyId);
         datasetMapper.updateStatus(Long.valueOf(primaryKeyId), DataStateEnum.STRENGTHENING_STATE.getCode());
@@ -81,7 +65,7 @@ public class AnnotationCompleteState extends AbstractDataState {
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void deletePicturesEvent(Integer primaryKeyId) {
+    public void deletePicturesEvent(Long primaryKeyId) {
         LogUtil.debug(LogEnum.STATE_MACHINE, " 【标注完成】 执行事件前内存中状态机的状态 :{} ", dataStateMachine.getMemoryDataState());
         LogUtil.debug(LogEnum.STATE_MACHINE, " 接受参数： {} ", primaryKeyId);
         datasetMapper.updateStatus(Long.valueOf(primaryKeyId), DataStateEnum.NOT_ANNOTATION_STATE.getCode());
@@ -95,7 +79,7 @@ public class AnnotationCompleteState extends AbstractDataState {
      * @param primaryKeyId 数据集ID
      */
     @Override
-    public void deleteAnnotatingEvent(Integer primaryKeyId) {
+    public void deleteAnnotatingEvent(Long primaryKeyId) {
         LogUtil.debug(LogEnum.STATE_MACHINE, " 【标注完成】 执行事件前内存中状态机的状态 :{} ", dataStateMachine.getMemoryDataState());
         LogUtil.debug(LogEnum.STATE_MACHINE, " 接受参数： {} ", primaryKeyId);
         Dataset dataset = datasetMapper.selectById(primaryKeyId);
@@ -142,7 +126,7 @@ public class AnnotationCompleteState extends AbstractDataState {
     public void finishManualEvent(Dataset dataset){
         LogUtil.debug(LogEnum.STATE_MACHINE, " 【标注完成】 执行事件前内存中状态机的状态 :{} ", dataStateMachine.getMemoryDataState());
         LogUtil.debug(LogEnum.STATE_MACHINE, " 接受参数： {} ", dataset);
-        DataStateEnum status = stateIdentify.getStatus(dataset.getId(),dataset.getCurrentVersionName(),true);
+        DataStateEnum status = stateIdentify.getStatus(dataset.getId(),dataset.getCurrentVersionName());
         switch (status){
             case NOT_ANNOTATION_STATE:
                 //未标注
@@ -170,7 +154,7 @@ public class AnnotationCompleteState extends AbstractDataState {
     public void deleteFilesEvent(Dataset dataset) {
         LogUtil.debug(LogEnum.STATE_MACHINE, " 【标注完成】 执行事件前内存中状态机的状态 :{} ", dataStateMachine.getMemoryDataState());
         LogUtil.debug(LogEnum.STATE_MACHINE, " 接受参数： {} ", dataset);
-        DataStateEnum status = stateIdentify.getStatus(dataset.getId(),dataset.getCurrentVersionName(),true);
+        DataStateEnum status = stateIdentify.getStatus(dataset.getId(),dataset.getCurrentVersionName());
         switch (status){
             case ANNOTATION_COMPLETE_STATE:
                 //标注完成
@@ -194,7 +178,7 @@ public class AnnotationCompleteState extends AbstractDataState {
     public void uploadFilesEvent(Dataset dataset) {
         LogUtil.debug(LogEnum.STATE_MACHINE, " 【标注完成】 执行事件前内存中状态机的状态 :{} ", dataStateMachine.getMemoryDataState());
         LogUtil.debug(LogEnum.STATE_MACHINE, " 接受参数： {} ", dataset);
-        DataStateEnum status = stateIdentify.getStatus(dataset.getId(),dataset.getCurrentVersionName(),true);
+        DataStateEnum status = stateIdentify.getStatus(dataset.getId(),dataset.getCurrentVersionName());
         switch (status){
             case MANUAL_ANNOTATION_STATE:
                 //手动标注中
@@ -216,10 +200,10 @@ public class AnnotationCompleteState extends AbstractDataState {
      * @param primaryKeyId 数据集详情
      */
     @Override
-    public void tableImportEvent(Integer primaryKeyId) {
+    public void tableImportEvent(Long primaryKeyId) {
         LogUtil.debug(LogEnum.STATE_MACHINE, " 【未标注】 执行事件前内存中状态机的状态 :{} ", dataStateMachine.getMemoryDataState());
         LogUtil.debug(LogEnum.STATE_MACHINE, " 接受参数： {} ", primaryKeyId);
-        datasetMapper.updateStatus(Long.valueOf(primaryKeyId), DataStateEnum.IN_THE_IMPORT_STATE.getCode());
+        datasetMapper.updateStatus(primaryKeyId, DataStateEnum.IN_THE_IMPORT_STATE.getCode());
         dataStateMachine.setMemoryDataState(dataStateMachine.getImportState());
         LogUtil.debug(LogEnum.STATE_MACHINE, " 【未标注】 执行事件后内存状态机的切换： {}", dataStateMachine.getMemoryDataState());
     }
@@ -230,10 +214,10 @@ public class AnnotationCompleteState extends AbstractDataState {
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void autoAnnotationsEvent(Integer primaryKeyId) {
+    public void autoAnnotationsEvent(Long primaryKeyId) {
         LogUtil.debug(LogEnum.STATE_MACHINE, " 【手动标注中】 执行事件前内存中状态机的状态 :{} ", dataStateMachine.getMemoryDataState());
         LogUtil.debug(LogEnum.STATE_MACHINE, " 接受参数： {} ", primaryKeyId);
-        datasetMapper.updateStatus(Long.valueOf(primaryKeyId), DataStateEnum.AUTOMATIC_LABELING_STATE.getCode());
+        datasetMapper.updateStatus(primaryKeyId, DataStateEnum.AUTOMATIC_LABELING_STATE.getCode());
         dataStateMachine.setMemoryDataState(dataStateMachine.getAutomaticLabelingState());
         LogUtil.debug(LogEnum.STATE_MACHINE, " 【手动标注中】 执行事件后内存状态机的切换： {}", dataStateMachine.getMemoryDataState());
     }

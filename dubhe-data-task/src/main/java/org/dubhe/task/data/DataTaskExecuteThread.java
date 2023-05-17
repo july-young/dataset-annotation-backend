@@ -1,20 +1,3 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
-
 package org.dubhe.task.data;
 
 import cn.hutool.core.collection.CollectionUtil;
@@ -33,6 +16,8 @@ import org.dubhe.biz.file.utils.MinioUtil;
 import org.dubhe.biz.log.enums.LogEnum;
 import org.dubhe.biz.log.utils.LogUtil;
 import org.dubhe.biz.redis.utils.RedisUtils;
+import org.dubhe.data.machine.statemachine.DataStateMachine;
+import org.dubhe.data.machine.statemachine.FileStateMachine;
 import org.dubhe.data.statemachine.dto.StateChangeDTO;
 import org.dubhe.data.constant.Constant;
 import org.dubhe.data.constant.DatasetLabelEnum;
@@ -45,7 +30,6 @@ import org.dubhe.data.domain.dto.OfRecordTaskDto;
 import org.dubhe.data.domain.entity.*;
 import org.dubhe.biz.base.vo.DatasetVO;
 import org.dubhe.data.machine.constant.DataStateMachineConstant;
-import org.dubhe.data.machine.utils.StateMachineUtil;
 import org.dubhe.data.pool.BasePool;
 import org.dubhe.data.service.*;
 import org.dubhe.data.util.TaskUtils;
@@ -95,7 +79,10 @@ public class DataTaskExecuteThread implements Runnable {
     private AnnotationService annotationService;
     @Autowired
     private DatasetEnhanceService datasetEnhanceService;
-
+    @Autowired
+    private DataStateMachine dataStateMachine;
+    @Autowired
+    private FileStateMachine fileStateMachine;
 
     @Resource
     private TaskUtils taskUtils;
@@ -247,12 +234,12 @@ public class DataTaskExecuteThread implements Runnable {
                 task.getId().toString(),
                 taskId
         );
-        if(task.getModelServiceId()!=null){
-            taskQueue = taskQueue.replace(TaskQueueNameEnum.TaskQueueConfigEnum.TRACK.getName(),task.getModelServiceId().toString());
-            detail = detail.replace(TaskQueueNameEnum.TaskQueueConfigEnum.TRACK.getName(),task.getModelServiceId().toString());
+        if (task.getModelServiceId() != null) {
+            taskQueue = taskQueue.replace(TaskQueueNameEnum.TaskQueueConfigEnum.TRACK.getName(), task.getModelServiceId().toString());
+            detail = detail.replace(TaskQueueNameEnum.TaskQueueConfigEnum.TRACK.getName(), task.getModelServiceId().toString());
         }
         redisUtils.set(detail, jsonObject);
-        taskUtils.zAdd(taskQueue, taskId,10L);
+        taskUtils.zAdd(taskQueue, taskId, 10L);
     }
 
 
@@ -266,7 +253,7 @@ public class DataTaskExecuteThread implements Runnable {
         int offset = 0;
         List<TaskSplitBO> allRedisTaskBo = new ArrayList<>();
         while (true) {
-            List<File> files = fileService.listBatchFile(task.getDatasetId(), offset, ANNOTATION_BATCH_SIZE,FileTypeEnum.getStatus(task.getFileType()));
+            List<File> files = fileService.listBatchFile(task.getDatasetId(), offset, ANNOTATION_BATCH_SIZE, FileTypeEnum.getStatus(task.getFileType()));
             if (CollectionUtil.isNotEmpty(files)) {
                 //处理文件生成任务
                 DatasetVO datasetVO = datasetService.get(task.getDatasetId());
@@ -290,7 +277,7 @@ public class DataTaskExecuteThread implements Runnable {
             annotationService.deleteAnnotating(task.getDatasetId());
             annotationService.deleteEsData(task.getDatasetId());
         }
-        redisPipeline(allRedisTaskBo, TaskQueueNameEnum.TaskQueueConfigEnum.TEXT_CLASSIFICATION,task);
+        redisPipeline(allRedisTaskBo, TaskQueueNameEnum.TaskQueueConfigEnum.TEXT_CLASSIFICATION, task);
     }
 
     /**
@@ -372,20 +359,20 @@ public class DataTaskExecuteThread implements Runnable {
 
             String taskQueue = TaskQueueNameEnum.getTemplate(
                     TaskQueueNameEnum.TASK,
-                    TaskQueueNameEnum.TaskQueueConfigEnum.OFRECORD,
+                    TaskQueueNameEnum.TaskQueueConfigEnum.OF_RECORD,
                     String.valueOf(task.getDatasetId()),
                     task.getId().toString()
             );
 
             String detail = TaskQueueNameEnum.getTemplate(
                     TaskQueueNameEnum.DETAIL,
-                    TaskQueueNameEnum.TaskQueueConfigEnum.OFRECORD,
+                    TaskQueueNameEnum.TaskQueueConfigEnum.OF_RECORD,
                     String.valueOf(task.getDatasetId()),
                     task.getId().toString(),
                     taskId
             );
 
-            taskUtils.zAdd(taskQueue,taskId,10L);
+            taskUtils.zAdd(taskQueue, taskId, 10L);
             redisUtils.set(detail, ofRecordTaskDto);
             return offset;
         }
@@ -395,7 +382,7 @@ public class DataTaskExecuteThread implements Runnable {
     /**
      * 生成自动标注任务
      *
-     * @param task    任务信息
+     * @param task 任务信息
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
@@ -419,7 +406,7 @@ public class DataTaskExecuteThread implements Runnable {
                     }
                 });
                 configEnum = DatasetLabelEnum.IMAGE_NET.getType().equals(taskSplitBOList.get(0).getLabelType()) ?
-                        TaskQueueNameEnum.TaskQueueConfigEnum.IMAGENET :
+                        TaskQueueNameEnum.TaskQueueConfigEnum.IMAGE_NET :
                         TaskQueueNameEnum.TaskQueueConfigEnum.ANNOTATION;
                 allRedisTaskBo.addAll(taskSplitBOList);
                 offset += files.size();
@@ -439,13 +426,13 @@ public class DataTaskExecuteThread implements Runnable {
      * @param taskSplitBOList 任务详情
      * @param configEnum      算法选择
      */
-    public void redisPipeline(List<TaskSplitBO> taskSplitBOList,TaskQueueNameEnum.TaskQueueConfigEnum configEnum,Task task) {
-        taskSplitBOList.stream().forEach(taskSplitBO->{
+    public void redisPipeline(List<TaskSplitBO> taskSplitBOList, TaskQueueNameEnum.TaskQueueConfigEnum configEnum, Task task) {
+        taskSplitBOList.stream().forEach(taskSplitBO -> {
             for (FileBO fileBO : taskSplitBO.getFiles()) {
                 fileBO.setUrl(prefixPath + fileBO.getUrl());
             }
         });
-        try{
+        try {
             FastJsonRedisSerializer<Object> fastJsonRedisSerializer = new FastJsonRedisSerializer<>(Object.class);
             redisTemplate.executePipelined(new RedisCallback<Object>() {
                 @SneakyThrows
@@ -469,17 +456,17 @@ public class DataTaskExecuteThread implements Runnable {
                                 task.getId().toString(),
                                 taskId
                         );
-                        if(task.getModelServiceId() != null){
+                        if (task.getModelServiceId() != null) {
                             taskQueue = taskQueue.replace(configEnum.getName(), task.getModelServiceId().toString());
                             detail = detail.replace(configEnum.getName(), task.getModelServiceId().toString());
                         }
-                        redisUtils.set(detail,taskSplitBOList.get(i));
-                        taskUtils.zAdd(taskQueue, taskId,10L);
+                        redisUtils.set(detail, taskSplitBOList.get(i));
+                        taskUtils.zAdd(taskQueue, taskId, 10L);
                     }
                     return null;
                 }
             });
-        } catch (Exception e){
+        } catch (Exception e) {
             LogUtil.error(LogEnum.BIZ_DATASET, "redis pipeline error {}", e);
         }
     }
@@ -502,20 +489,20 @@ public class DataTaskExecuteThread implements Runnable {
         String taskId = UUID.randomUUID().toString();
         String taskQueue = TaskQueueNameEnum.getTemplate(
                 TaskQueueNameEnum.TASK,
-                TaskQueueNameEnum.TaskQueueConfigEnum.IMGPROCESS,
+                TaskQueueNameEnum.TaskQueueConfigEnum.IMG_PROCESS,
                 String.valueOf(task.getDatasetId()),
                 task.getId().toString()
         );
 
         String detail = TaskQueueNameEnum.getTemplate(
                 TaskQueueNameEnum.DETAIL,
-                TaskQueueNameEnum.TaskQueueConfigEnum.IMGPROCESS,
+                TaskQueueNameEnum.TaskQueueConfigEnum.IMG_PROCESS,
                 String.valueOf(task.getDatasetId()),
                 task.getId().toString(),
                 taskId
         );
 
-        datasetEnhanceService.commitEnhanceTask(datasetVersionFiles, task, datasetEnhanceRequestDTO,taskQueue,detail,taskId);
+        datasetEnhanceService.commitEnhanceTask(datasetVersionFiles, task, datasetEnhanceRequestDTO, taskQueue, detail, taskId);
     }
 
     /**
@@ -543,28 +530,21 @@ public class DataTaskExecuteThread implements Runnable {
                     default:
                         LogUtil.error(LogEnum.BIZ_DATASET, "import table format not support");
                         break;
-                };
+                }
+                ;
                 LogUtil.info(LogEnum.BIZ_DATASET, "table import size is {}, datasetid:{}", files.size(), datasetId);
-                if(CollectionUtil.isNotEmpty(files)) {
+                if (CollectionUtil.isNotEmpty(files)) {
                     LogUtil.info(LogEnum.BIZ_DATASET, "table import save db datasetid:{}", datasetId);
                     List<List<File>> lists = ListUtils.partition(files, NumberConstant.NUMBER_1000 * NumberConstant.NUMBER_3);
                     LogUtil.info(LogEnum.BIZ_DATASET, "table import save db datasetid:{} pars:{}", datasetId, lists.size());
                     for (List<File> el : lists) {
                         List<Long> fileIds = csvImportSaveDb(el, dataset);
                         LogUtil.info(LogEnum.BIZ_DATASET, "table import transport to es datasetid:{}", datasetId);
-                        fileService.transportTextToEs(dataset, fileIds,Boolean.FALSE);
+                        fileService.transportTextToEs(dataset, fileIds, Boolean.FALSE);
                     }
                 }
                 //-------  导入完成后 更改数据集状态 ---------
-                //创建入参请求体
-                StateChangeDTO stateChangeDTO = new StateChangeDTO();
-                //更新数据集状态为导入中
-                stateChangeDTO.setObjectParam(new Object[]{dataset});
-                //添加需要执行的状态机类
-                stateChangeDTO.setStateMachineType(DataStateMachineConstant.DATA_STATE_MACHINE);
-                //数据集导入完成
-                stateChangeDTO.setEventMethodName(DataStateMachineConstant.TABLE_IMPORT_FINISH_EVENT);
-                StateMachineUtil.stateChange(stateChangeDTO);
+                dataStateMachine.tableImportFinishEvent(dataset);
                 //-------  导入完成后 更改数据集状态 ---------
             } catch (Exception e) {
                 LogUtil.error(LogEnum.BIZ_DATASET, "read csv error {}", e);
@@ -575,11 +555,11 @@ public class DataTaskExecuteThread implements Runnable {
     /**
      * 批量保存文件数据到DB
      *
-     * @param files 文件数据
+     * @param files   文件数据
      * @param dataset 数据集详情
      */
     @Transactional(rollbackFor = Exception.class)
-    public List<Long> csvImportSaveDb(List<File> files,Dataset dataset) {
+    public List<Long> csvImportSaveDb(List<File> files, Dataset dataset) {
         LogUtil.info(LogEnum.BIZ_DATASET, "table import save db start datasetid:{} fileSize:{}", dataset.getId(), files.size());
         List<FileCreateDTO> fileCreateDTOS = new ArrayList<>();
         files.stream().forEach(file -> {
@@ -614,7 +594,7 @@ public class DataTaskExecuteThread implements Runnable {
      *
      * @param task 任务详情
      */
-    public void convertPreDataset(Task task){
+    public void convertPreDataset(Task task) {
         Dataset originDataset = datasetService.getOneById(task.getDatasetId());
         Dataset targetDataset = datasetService.getOneById(task.getTargetId());
         List<DatasetVersionFile> versionFiles = datasetVersionFileService

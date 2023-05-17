@@ -1,19 +1,4 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
+
 
 package org.dubhe.data.util;
 
@@ -21,8 +6,10 @@ import org.dubhe.biz.base.constant.MagicNumConstant;
 import org.dubhe.biz.base.utils.StringUtils;
 import org.dubhe.biz.log.enums.LogEnum;
 import org.dubhe.biz.log.utils.LogUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
@@ -38,12 +25,11 @@ import java.util.Set;
 @Component
 public class TaskUtils {
 
-    private RedisTemplate<Object, Object> redisTemplate;
+    @Autowired
+    private RedisTemplate  redisTemplate;
 
-    public TaskUtils(RedisTemplate<Object, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
-
+    @Autowired
+    private StringRedisTemplate  stringRedisTemplate;
     /**
      * 获取zset中的数据和时间
      *
@@ -67,12 +53,12 @@ public class TaskUtils {
      * @param score        分数
      * @return 任务是否存放成功
      */
-    public boolean addTask(String queueName, String taskDetails, String detailKey,int score) {
+    public Boolean addTask(String queueName, String taskDetails, String detailKey,int score) {
         DefaultRedisScript<Boolean> addTaskScript = new DefaultRedisScript<>();
         addTaskScript.setResultType(Boolean.class);
         addTaskScript.setLocation(new ClassPathResource("addTask.lua"));
         try {
-            return redisTemplate.execute(addTaskScript, Collections.singletonList(detailKey)
+            return stringRedisTemplate.execute(addTaskScript, Collections.singletonList(detailKey)
                     , queueName, taskDetails, score);
         } catch (Exception e) {
             LogUtil.error(LogEnum.BIZ_DATASET, "RedisUtils addTask error:{}", e.getMessage(), e);
@@ -89,12 +75,12 @@ public class TaskUtils {
      * @param taskKey   任务key
      * @return boolean 是否完成
      */
-    public boolean finishedTask(String queueName, String keyId, String taskType, String taskKey) {
+    public Boolean finishedTask(String queueName, String keyId, String taskType, String taskKey) {
         DefaultRedisScript<Boolean> finishedTaskScript = new DefaultRedisScript<>();
         finishedTaskScript.setResultType(Boolean.class);
         finishedTaskScript.setLocation(new ClassPathResource("finishedTask.lua"));
         try {
-            return redisTemplate.execute(finishedTaskScript, Collections.singletonList(queueName)
+            return stringRedisTemplate.execute(finishedTaskScript, Collections.singletonList(queueName)
                     , keyId, taskType, taskKey);
         } catch (Exception e) {
             LogUtil.error(LogEnum.BIZ_DATASET, "RedisUtils finishedTask error:{}", e.getMessage(), e);
@@ -112,7 +98,7 @@ public class TaskUtils {
         finishedTaskScript.setResultType(String.class);
         finishedTaskScript.setLocation(new ClassPathResource("getFinishedTask.lua"));
         try {
-            return redisTemplate.execute(finishedTaskScript, redisTemplate.getStringSerializer(),redisTemplate.getStringSerializer(),Collections.singletonList(queueName));
+            return stringRedisTemplate.execute(finishedTaskScript,  Collections.singletonList(queueName));
         } catch (Exception e) {
             return null;
         }
@@ -128,7 +114,7 @@ public class TaskUtils {
         failedTaskScript.setResultType(String.class);
         failedTaskScript.setLocation(new ClassPathResource("getFailedTask.lua"));
         try {
-            return redisTemplate.execute(failedTaskScript, redisTemplate.getStringSerializer(),redisTemplate.getStringSerializer(), Collections.singletonList(queueName));
+            return stringRedisTemplate.execute(failedTaskScript,Collections.singletonList(queueName));
         } catch (Exception e) {
             return null;
         }
@@ -144,12 +130,12 @@ public class TaskUtils {
      * @param datasetIdKey    数据集ID对应key
      * @return boolean 重启任务是否成功
      */
-    public boolean restartTask(String keyId, String processingName, String unprocessedName, String detailName, String datasetIdKey) {
+    public Boolean restartTask(String keyId, String processingName, String unprocessedName, String detailName, String datasetIdKey) {
         DefaultRedisScript<Boolean> restartTaskScript = new DefaultRedisScript<>();
         restartTaskScript.setResultType(Boolean.class);
         restartTaskScript.setLocation(new ClassPathResource("restartTask.lua"));
         try {
-            return redisTemplate.execute(restartTaskScript, Collections.singletonList(keyId),
+            return stringRedisTemplate.execute(restartTaskScript, Collections.singletonList(keyId),
                     processingName, unprocessedName, detailName, datasetIdKey);
         } catch (Exception e) {
             LogUtil.error(LogEnum.BIZ_DATASET, "RedisUtils restartTask error:{}", e.getMessage(), e);
@@ -163,9 +149,9 @@ public class TaskUtils {
      * @param key key
      * @return Boolean 放入数据到缓存是否成功
      */
-    public Boolean zAdd(String key, Object value, Long zscore) {
+    public Boolean zAdd(String key, Object value, Long zScore) {
         try {
-            return redisTemplate.opsForZSet().add(key, value, zscore);
+            return redisTemplate.opsForZSet().add(key, value, zScore);
         } catch (Exception e) {
             LogUtil.error(LogEnum.SYS_ERR, "RedisUtils zSet key {} value {} error:{}", key, value, e.getMessage(), e);
             return false;

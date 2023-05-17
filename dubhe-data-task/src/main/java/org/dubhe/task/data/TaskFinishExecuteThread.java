@@ -1,23 +1,5 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
-
 package org.dubhe.task.data;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.dubhe.biz.base.constant.MagicNumConstant;
@@ -70,38 +52,32 @@ public class TaskFinishExecuteThread implements Runnable {
         }
     }
 
-    private void finishExecute(boolean ifFinish) {
-        String queueName;
-        if(ifFinish){
-            queueName = TaskQueueNameEnum.getTemplate(TaskQueueNameEnum.FINISHED_TASK, TaskQueueNameEnum.TaskQueueConfigEnum.ALL);
-        } else {
-            queueName = TaskQueueNameEnum.getTemplate(TaskQueueNameEnum.FAILED_TASK, TaskQueueNameEnum.TaskQueueConfigEnum.ALL);
-        }
-        JSONObject detail = getDetail(queueName, ifFinish);
-        if(detail != null){
+    private void finishExecute(boolean isSuccess) {
+        TaskQueueNameEnum taskQueueNameEnum = isSuccess ? TaskQueueNameEnum.FINISHED_TASK : TaskQueueNameEnum.FAILED_TASK;
+        String queueName = TaskQueueNameEnum.getTemplate(taskQueueNameEnum, TaskQueueNameEnum.TaskQueueConfigEnum.ALL);
+
+        JSONObject detail = getDetail(queueName, isSuccess);
+        if (detail != null) {
             Integer algorithm = detail.getInteger("algorithm");
             AbstractAlgorithmExecute abstractAlgorithmExecute = (AbstractAlgorithmExecute) SpringContextHolder.getBean(DataAlgorithmEnum.getType(algorithm).getClassName());
-            if(ifFinish){
-                abstractAlgorithmExecute.finishMethod(object,detailQueue,detail);
+            if (isSuccess) {
+                abstractAlgorithmExecute.finishMethod(object, detailQueue, detail);
             } else {
-                abstractAlgorithmExecute.failMethod(object,detailQueue,detail);
+                abstractAlgorithmExecute.failMethod(object, detailQueue, detail);
             }
         }
     }
 
-    private JSONObject getDetail(String queueName,boolean ifFinish){
-        if(ifFinish){
-            object = taskUtils.getFinishedTask(queueName);
-        } else {
-            object = taskUtils.getFailedTask(queueName);
-        }
-        if (ObjectUtil.isNotNull(object)) {
+    private JSONObject getDetail(String queueName, boolean isSuccess) {
+        object = isSuccess ? taskUtils.getFinishedTask(queueName) : taskUtils.getFailedTask(queueName);
+
+        if (object != null) {
             JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(redisUtils.get(object.toString())));
             //获取详情
             String objectString = object.toString();
             StringBuffer sb = new StringBuffer(objectString);
             detailQueue = sb.replace(objectString.lastIndexOf("annotation")
-                    ,objectString.lastIndexOf("annotation")+"annotation".length(),"detail").toString();
+                    , objectString.lastIndexOf("annotation") + "annotation".length(), "detail").toString();
             JSONObject taskDetail = JSON.parseObject(JSON.toJSONString(redisUtils.get(detailQueue)));
             if (taskDetail == null) {
                 redisUtils.del(object.toString());

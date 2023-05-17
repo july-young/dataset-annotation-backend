@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
 package org.dubhe.data.machine.statemachine;
 
 import lombok.Data;
@@ -27,6 +11,8 @@ import org.dubhe.data.machine.state.AbstractDataState;
 import org.dubhe.data.machine.state.specific.data.*;
 import org.dubhe.data.machine.utils.StateIdentifyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -37,6 +23,7 @@ import java.io.Serializable;
  */
 @Data
 @Component
+@Scope(value = "request",proxyMode= ScopedProxyMode.TARGET_CLASS)
 public class DataStateMachine extends AbstractDataState implements Serializable {
 
     /**
@@ -132,13 +119,14 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
 
     /**
      * 改变数据集的状态
-     * @param datasetId         数据集ID
-     * @param status            数据集状态
-     * @param dataStateMachine  内存中的状态
+     *
+     * @param datasetId        数据集ID
+     * @param status           数据集状态
+     * @param dataStateMachine 内存中的状态
      */
-    public void doStateChange(Long datasetId,Integer status,AbstractDataState dataStateMachine){
+    public void doStateChange(Long datasetId, Integer status, AbstractDataState dataStateMachine) {
         datasetMapper.updateStatus(datasetId, status);
-        this.memoryDataState=dataStateMachine;
+        this.memoryDataState = dataStateMachine;
     }
 
     /**
@@ -147,7 +135,7 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      * @return Dataset 数据集详情
      */
-    public Dataset initMemoryDataState(Integer primaryKeyId) {
+    public Dataset initMemoryDataState(Long primaryKeyId) {
         if (primaryKeyId == null) {
             throw new StateMachineException("未找到业务ID");
         }
@@ -165,7 +153,7 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void deleteAnnotatingEvent(Integer primaryKeyId) {
+    public void deleteAnnotatingEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (
                 memoryDataState != autoTagCompleteState &&
@@ -187,7 +175,7 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      */
     @Override
     public void trackEvent(Dataset dataset) {
-        initMemoryDataState(dataset.getId().intValue());
+        initMemoryDataState(dataset.getId());
         if (memoryDataState != targetFailureState &&
                 memoryDataState != autoTagCompleteState &&
                 memoryDataState != annotationCompleteState &&
@@ -204,12 +192,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void autoTrackFailEvent(Integer primaryKeyId) {
+    public void autoTrackFailEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != targetFollowState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.autoTrackFailEvent(primaryKeyId);
+        targetFollowState.autoTrackFailEvent(primaryKeyId);
     }
 
     /**
@@ -219,11 +207,11 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      */
     @Override
     public void targetCompleteEvent(Dataset dataset) {
-        initMemoryDataState(dataset.getId().intValue());
+        initMemoryDataState(dataset.getId());
         if (memoryDataState != targetFollowState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.targetCompleteEvent(dataset);
+        targetFollowState.targetCompleteEvent(dataset);
     }
 
     /**
@@ -232,7 +220,7 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void autoAnnotationsEvent(Integer primaryKeyId) {
+    public void autoAnnotationsEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState == automaticLabelingState || memoryDataState == notSampledState
                 || memoryDataState == samplingState || memoryDataState == strengtheningState
@@ -249,11 +237,11 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      */
     @Override
     public void doFinishAutoAnnotationEvent(Dataset dataset) {
-        initMemoryDataState(dataset.getId().intValue());
+        initMemoryDataState(dataset.getId());
         if (memoryDataState != automaticLabelingState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.doFinishAutoAnnotationEvent(dataset);
+        automaticLabelingState.doFinishAutoAnnotationEvent(dataset);
     }
 
     /**
@@ -262,12 +250,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void sampledEvent(Integer primaryKeyId) {
+    public void sampledEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState == samplingState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.sampledEvent(primaryKeyId);
+        samplingState.sampledEvent(primaryKeyId);
     }
 
     /**
@@ -276,12 +264,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void samplingFailureEvent(Integer primaryKeyId) {
+    public void samplingFailureEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != samplingState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.samplingFailureEvent(primaryKeyId);
+        samplingState.samplingFailureEvent(primaryKeyId);
     }
 
     /**
@@ -290,12 +278,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void samplingEvent(Integer primaryKeyId) {
+    public void samplingEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != samplingState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.samplingEvent(primaryKeyId);
+        samplingState.samplingEvent(primaryKeyId);
     }
 
     /**
@@ -304,12 +292,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void autoAnnotationEvent(Integer primaryKeyId) {
+    public void autoAnnotationEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != notAnnotationState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.autoAnnotationEvent(primaryKeyId);
+        notAnnotationState.autoAnnotationEvent(primaryKeyId);
     }
 
     /**
@@ -318,12 +306,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void manualAnnotationCompleteEvent(Integer primaryKeyId) {
+    public void manualAnnotationCompleteEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != manualAnnotationState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.manualAnnotationCompleteEvent(primaryKeyId);
+        manualAnnotationState.manualAnnotationCompleteEvent(primaryKeyId);
     }
 
 
@@ -333,12 +321,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void manualAutomaticLabelingCompletionEvent(Integer primaryKeyId) {
+    public void manualAutomaticLabelingCompletionEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != manualAnnotationState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.manualAutomaticLabelingCompletionEvent(primaryKeyId);
+        manualAnnotationState.manualAutomaticLabelingCompletionEvent(primaryKeyId);
     }
 
     /**
@@ -347,12 +335,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void manualNotMakedEvent(Integer primaryKeyId) {
+    public void manualNotMarkedEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != manualAnnotationState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.manualNotMakedEvent(primaryKeyId);
+        manualAnnotationState.manualNotMarkedEvent(primaryKeyId);
     }
 
     /**
@@ -361,12 +349,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void automaticLabelingEvent(Integer primaryKeyId) {
+    public void automaticLabelingEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != automaticLabelingState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.automaticLabelingEvent(primaryKeyId);
+        automaticLabelingState.automaticLabelingEvent(primaryKeyId);
     }
 
     /**
@@ -376,18 +364,19 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      */
     @Override
     public void manualAnnotationSaveEvent(Dataset dataset) {
-        initMemoryDataState(dataset.getId().intValue());
+        initMemoryDataState(dataset.getId());
         if (memoryDataState == manualAnnotationState) {
             return;
-        } else if (
-                memoryDataState != notAnnotationState &&
-                        memoryDataState != autoTagCompleteState &&
-                        memoryDataState != annotationCompleteState &&
-                        memoryDataState != targetCompleteState
+        }
+        if (memoryDataState != notAnnotationState
+                && memoryDataState != autoTagCompleteState
+                && memoryDataState != annotationCompleteState
+                && memoryDataState != targetCompleteState
         ) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
         memoryDataState.manualAnnotationSaveEvent(dataset);
+
     }
 
     /**
@@ -397,7 +386,7 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      */
     @Override
     public void finishManualEvent(Dataset dataset) {
-        initMemoryDataState(dataset.getId().intValue());
+        initMemoryDataState(dataset.getId());
         if (
                 memoryDataState != notAnnotationState &&
                         memoryDataState != manualAnnotationState &&
@@ -416,12 +405,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void strengthenEvent(Integer primaryKeyId) {
+    public void strengthenEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != autoTagCompleteState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.strengthenEvent(primaryKeyId);
+        autoTagCompleteState.strengthenEvent(primaryKeyId);
     }
 
 
@@ -431,12 +420,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void uploadPicturesEvent(Integer primaryKeyId) {
+    public void uploadPicturesEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != autoTagCompleteState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.uploadPicturesEvent(primaryKeyId);
+        autoTagCompleteState.uploadPicturesEvent(primaryKeyId);
     }
 
     /**
@@ -445,12 +434,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void uploadSavePicturesEvent(Integer primaryKeyId) {
+    public void uploadSavePicturesEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != annotationCompleteState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.uploadSavePicturesEvent(primaryKeyId);
+        annotationCompleteState.uploadSavePicturesEvent(primaryKeyId);
     }
 
     /**
@@ -459,12 +448,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void completeStrengthenEvent(Integer primaryKeyId) {
+    public void completeStrengthenEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != annotationCompleteState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.completeStrengthenEvent(primaryKeyId);
+        annotationCompleteState.completeStrengthenEvent(primaryKeyId);
     }
 
     /**
@@ -473,12 +462,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void deletePicturesEvent(Integer primaryKeyId) {
+    public void deletePicturesEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != annotationCompleteState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.deletePicturesEvent(primaryKeyId);
+        annotationCompleteState.deletePicturesEvent(primaryKeyId);
     }
 
     /**
@@ -487,12 +476,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void strengtheningCompleteEvent(Integer primaryKeyId) {
+    public void strengtheningCompleteEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != strengtheningState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.strengtheningCompleteEvent(primaryKeyId);
+        strengtheningState.strengtheningCompleteEvent(primaryKeyId);
     }
 
     /**
@@ -501,12 +490,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void strengtheningAutoCompleteEvent(Integer primaryKeyId) {
+    public void strengtheningAutoCompleteEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != strengtheningState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.strengtheningAutoCompleteEvent(primaryKeyId);
+        strengtheningState.strengtheningAutoCompleteEvent(primaryKeyId);
     }
 
     /**
@@ -515,12 +504,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 数据集Id
      */
     @Override
-    public void deletePictrueNotMarkedEvent(Integer primaryKeyId) {
+    public void deletePictureNotMarkedEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState != autoTagCompleteState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.deletePictrueNotMarkedEvent(primaryKeyId);
+        autoTagCompleteState.deletePictureNotMarkedEvent(primaryKeyId);
     }
 
     /**
@@ -530,8 +519,8 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      */
     @Override
     public void deleteFilesEvent(Dataset dataset) {
-        initMemoryDataState(dataset.getId().intValue());
-        if (memoryDataState==notAnnotationState){
+        initMemoryDataState(dataset.getId());
+        if (memoryDataState == notAnnotationState) {
             return;
         }
         if (memoryDataState != manualAnnotationState &&
@@ -551,12 +540,13 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      */
     @Override
     public void uploadFilesEvent(Dataset dataset) {
-        initMemoryDataState(dataset.getId().intValue());
+        initMemoryDataState(dataset.getId());
         if (memoryDataState == manualAnnotationState) {
             return;
         }
-        if (memoryDataState != autoTagCompleteState &&
-                memoryDataState != annotationCompleteState && memoryDataState != notAnnotationState) {
+        if (memoryDataState != autoTagCompleteState
+                && memoryDataState != annotationCompleteState
+                && memoryDataState != notAnnotationState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
         memoryDataState.uploadFilesEvent(dataset);
@@ -568,12 +558,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param dataset 数据集详情
      */
     @Override
-    public void enhanceFinishEvent(Dataset dataset){
-        initMemoryDataState(dataset.getId().intValue());
+    public void enhanceFinishEvent(Dataset dataset) {
+        initMemoryDataState(dataset.getId());
         if (memoryDataState != strengtheningState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.enhanceFinishEvent(dataset);
+        strengtheningState.enhanceFinishEvent(dataset);
     }
 
     /**
@@ -582,12 +572,12 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      * @param primaryKeyId 业务ID
      */
     @Override
-    public void tableImportEvent(Integer primaryKeyId) {
+    public void tableImportEvent(Long primaryKeyId) {
         initMemoryDataState(primaryKeyId);
         if (memoryDataState == importState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.tableImportEvent(primaryKeyId);
+        importState.tableImportEvent(primaryKeyId);
     }
 
     /**
@@ -597,11 +587,11 @@ public class DataStateMachine extends AbstractDataState implements Serializable 
      */
     @Override
     public void tableImportFinishEvent(Dataset dataset) {
-        initMemoryDataState(dataset.getId().intValue());
+        initMemoryDataState(dataset.getId());
         if (memoryDataState != importState) {
             throw new StateMachineException(ErrorMessageConstant.DATASET_CHANGE_ERR_MESSAGE);
         }
-        memoryDataState.tableImportFinishEvent(dataset);
+        importState.tableImportFinishEvent(dataset);
     }
 
 }

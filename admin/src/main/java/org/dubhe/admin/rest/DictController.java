@@ -1,32 +1,15 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
 package org.dubhe.admin.rest;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.dubhe.admin.domain.dto.DictCreateDTO;
-import org.dubhe.admin.domain.dto.DictDeleteDTO;
-import org.dubhe.admin.domain.dto.DictQueryDTO;
-import org.dubhe.admin.domain.dto.DictUpdateDTO;
+import org.dubhe.admin.domain.dto.*;
 import org.dubhe.admin.service.DictService;
 import org.dubhe.biz.base.constant.Permissions;
+import org.dubhe.biz.base.dto.DeleteDTO;
 import org.dubhe.biz.base.vo.DataResponseBody;
 import org.dubhe.biz.dataresponse.factory.DataResponseFactory;
+import org.dubhe.biz.db.utils.PageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,10 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @description 字典管理 控制器
- * @date 2020-06-01
  */
 @Api(tags = "系统：字典管理")
 @RestController
@@ -59,21 +42,23 @@ public class DictController {
     @GetMapping(value = "/download")
     @PreAuthorize(Permissions.DICT_DOWNLOAD)
     public void download(HttpServletResponse response, DictQueryDTO criteria) throws IOException {
-        dictService.download(dictService.queryAll(criteria), response);
+        dictService.download(dictService.list(criteria), response);
     }
 
     @ApiOperation("查询字典")
     @GetMapping(value = "/all")
     @PreAuthorize(Permissions.DICT)
-    public DataResponseBody all() {
-        return new DataResponseBody(dictService.queryAll(new DictQueryDTO()));
+    public DataResponseBody<List<DictDTO>> all() {
+        List<DictDTO> dictDTOS = dictService.list(new DictQueryDTO());
+        return new DataResponseBody(dictDTOS);
     }
 
     @ApiOperation("查询字典")
     @GetMapping
     @PreAuthorize(Permissions.DICT)
-    public DataResponseBody getDicts(DictQueryDTO resources, Page page) {
-        return new DataResponseBody(dictService.queryAll(resources, page));
+    public DataResponseBody<PageDTO<DictDTO>> page(DictQueryDTO resources, Page page) {
+        PageDTO<DictDTO> pageDTO = dictService.page(resources, page);
+        return new DataResponseBody(pageDTO);
     }
 
     @ApiOperation("新增字典")
@@ -94,7 +79,7 @@ public class DictController {
     @ApiOperation("批量删除字典")
     @DeleteMapping
     @PreAuthorize(Permissions.DICT_DELETE)
-    public DataResponseBody delete(@RequestBody DictDeleteDTO dto) {
+    public DataResponseBody delete(@RequestBody DeleteDTO dto) {
         dictService.deleteAll(dto.getIds());
         return new DataResponseBody();
     }

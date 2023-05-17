@@ -1,12 +1,12 @@
 /**
  * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,11 +53,11 @@ public enum AnnotateTypeEnum {
     /**
      * 文本分词
      */
-    TEXT_SEGMENTATION(302,"文本分词"),
+    TEXT_SEGMENTATION(302, "文本分词"),
     /**
      * 命名实体识别
      */
-    NAMED_ENTITY_RECOGNITION(303,"命名实体识别"),
+    NAMED_ENTITY_RECOGNITION(303, "命名实体识别"),
     /**
      * 语音识别
      */
@@ -76,27 +76,16 @@ public enum AnnotateTypeEnum {
     private Integer value;
     private String msg;
 
-    /**
-     * 标注类型校验 用户web端接口调用时参数校验
-     *
-     * @param value 标注类型Integer值
-     * @return      参数校验结果
-     */
-    public static boolean isValid(Integer value) {
-        for (AnnotateTypeEnum annotateTypeEnum : AnnotateTypeEnum.values()) {
-            if (annotateTypeEnum.value.equals(value)) {
-                return true;
-            }
+
+    public static boolean isStoreInEs(Integer value) {
+        if (TEXT_CLASSIFICATION.getValue().equals(value)
+                || TEXT_SEGMENTATION.getValue().equals(value)
+                || NAMED_ENTITY_RECOGNITION.getValue().equals(value)) {
+            return true;
         }
         return false;
     }
 
-    /**
-     * 根据标注类型获取类型code值
-     *
-     * @param annotate 标注类型
-     * @return         类型code值
-     */
     public static Integer getConvertAnnotateType(String annotate) {
         for (AnnotateTypeEnum annotateTypeEnum : AnnotateTypeEnum.values()) {
             if (annotateTypeEnum.msg.equals(annotate)) {
@@ -104,20 +93,6 @@ public enum AnnotateTypeEnum {
             }
         }
         return null;
-    }
-
-    /**
-     * 获取错误提示信息
-     *
-     * @return 错误提示信息字符串
-     */
-    public static String getErrorMessage() {
-        StringBuilder stringBuilder = new StringBuilder("数据标注类型参数不对, 请使用:");
-        for (AnnotateTypeEnum annotateTypeEnum : AnnotateTypeEnum.values()) {
-            stringBuilder.append(" ").append(annotateTypeEnum.getValue()).append("-")
-                    .append(annotateTypeEnum.getMsg());
-        }
-        return stringBuilder.toString();
     }
 
 }

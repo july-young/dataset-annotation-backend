@@ -1,18 +1,3 @@
-/**
- * Copyright 2019-2020 Zheng Jie
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.dubhe.admin.rest;
 
 import cn.hutool.crypto.asymmetric.KeyType;
@@ -37,10 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * @description 个人中心 控制器
- * @date 2020-06-01
- */
 @Api(tags = "系统：个人中心")
 @RestController
 @RequestMapping("/user")
@@ -64,22 +45,15 @@ public class UserCenterController {
     @Value("${rsa.private_key}")
     private String privateKey;
 
-
-    @ApiOperation("用户团队")
-    @GetMapping(value = "/teams")
-    public DataResponseBody getTeams() {
-        return new DataResponseBody(userService.queryTeams(userContextService.getCurUserId()));
-    }
-
     @ApiOperation("获取前端所需菜单")
     @GetMapping(value = "/menus")
     public DataResponseBody menus() {
         Long curUserId = userContextService.getCurUserId();
         List<RoleSmallDTO> roles = roleService.getRoleByUserId(curUserId);
         List<MenuDTO> menuDtoList = menuService.findByRoles(roles);
-        List<MenuDTO> menuDtos = (List<MenuDTO>) menuService.buildTree(menuDtoList).get("result");
+        List<MenuDTO> menuDTOList =menuService.buildTree(menuDtoList).getResult();
 
-        return new DataResponseBody(menuService.buildMenus(menuDtos));
+        return new DataResponseBody(menuService.buildMenus(menuDTOList));
     }
 
     @ApiOperation("用户查询字典详情")
@@ -90,8 +64,9 @@ public class UserCenterController {
 
     @ApiOperation("个人中心")
     @GetMapping(value = "info")
-    public DataResponseBody getInfo() {
-        return new DataResponseBody(userContextService.getCurUser());
+    public DataResponseBody<UserContext> getInfo() {
+        UserContext userContext = userContextService.getCurUser();
+        return new DataResponseBody(userContext);
     }
 
     @ApiOperation("修改用户：个人中心")
@@ -135,6 +110,7 @@ public class UserCenterController {
     @ApiOperation("修改邮箱接口")
     @PostMapping(value = "/resetEmail")
     public DataResponseBody resetEmail(@RequestBody UserEmailUpdateDTO userEmailUpdateDTO) {
-        return userService.resetEmail(userEmailUpdateDTO);
+        userService.resetEmail(userEmailUpdateDTO);
+        return new DataResponseBody();
     }
 }

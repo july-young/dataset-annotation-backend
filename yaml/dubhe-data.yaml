@@ -32,16 +32,6 @@ spring:
             standard:
               sharding-column: dataset_id
               precise-algorithm-class-name: org.dubhe.data.util.MyPreciseShardingAlgorithm
-k8s:
-  # nfs服务暴露的IP地址 如需测试需修改为合适的地址
-  nfs: 10.5.26.234
-  #nfs服务端 共享目录
-  nfs-root-path: /nfs/
-  nfs-root-windows-path: "Z:"
-  file-store: 10.5.26.234
-  #文件存储服务端 共享目录
-  file-store-root-path: /nfs/
-  file-store-root-windows-path: "Z:"
 
 # data模块配置
 data:
@@ -79,10 +69,10 @@ recycle:
     
 # ES服务地址及端口
 es:
-  host: 10.255.198.101
+  host: 192.168.199.187
   serverPort: 32321
   transportPort: 32311
-  clusterName: docker-cluster
+  clusterName: kubernetes-logging
   index: dataset_text_test
 
 dataset:
@@ -95,3 +85,6 @@ dataset:
 security:
   permitAll:
     matchers: /api/k8s/callback/deployment/data  
+
+logging:
+  config: classpath:logback-spring.xml

@@ -1,12 +1,12 @@
 /**
  * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,27 +30,27 @@ public enum FileStateEnum {
     /**
      * 未标注
      */
-    NOT_ANNOTATION_FILE_STATE(FileStateCodeConstant.NOT_ANNOTATION_FILE_STATE, "notAnnotationFileState","未标注"),
+    NOT_ANNOTATION_FILE_STATE(FileStateCodeConstant.NOT_ANNOTATION_FILE_STATE, "notAnnotationFileState", "未标注"),
     /**
      * 手动标注中
      */
-    MANUAL_ANNOTATION_FILE_STATE(FileStateCodeConstant.MANUAL_ANNOTATION_FILE_STATE, "manualAnnotationFileState","手动标注中"),
+    MANUAL_ANNOTATION_FILE_STATE(FileStateCodeConstant.MANUAL_ANNOTATION_FILE_STATE, "manualAnnotationFileState", "手动标注中"),
     /**
      * 自动标注完成
      */
-    AUTO_TAG_COMPLETE_FILE_STATE(FileStateCodeConstant.AUTO_TAG_COMPLETE_FILE_STATE, "autoTagCompleteFileState","自动标注完成"),
+    AUTO_TAG_COMPLETE_FILE_STATE(FileStateCodeConstant.AUTO_TAG_COMPLETE_FILE_STATE, "autoTagCompleteFileState", "自动标注完成"),
     /**
      * 标注完成
      */
-    ANNOTATION_COMPLETE_FILE_STATE(FileStateCodeConstant.ANNOTATION_COMPLETE_FILE_STATE, "annotationCompleteFileState","标注完成"),
+    ANNOTATION_COMPLETE_FILE_STATE(FileStateCodeConstant.ANNOTATION_COMPLETE_FILE_STATE, "annotationCompleteFileState", "标注完成"),
     /**
      * 标注未识别
      */
-    ANNOTATION_NOT_DISTINGUISH_FILE_STATE(FileStateCodeConstant.ANNOTATION_NOT_DISTINGUISH_FILE_STATE, "annotationNotDistinguishFileState","标注未识别"),
+    ANNOTATION_NOT_DISTINGUISH_FILE_STATE(FileStateCodeConstant.ANNOTATION_NOT_DISTINGUISH_FILE_STATE, "annotationNotDistinguishFileState", "标注未识别"),
     /**
      * 目标跟踪完成
      */
-    TARGET_COMPLETE_FILE_STATE(FileStateCodeConstant.TARGET_COMPLETE_FILE_STATE, "targetCompleteFileState","目标跟踪完成");
+    TARGET_COMPLETE_FILE_STATE(FileStateCodeConstant.TARGET_COMPLETE_FILE_STATE, "targetCompleteFileState", "目标跟踪完成");
     /**
      * 编码
      */
@@ -88,7 +88,7 @@ public enum FileStateEnum {
         this.stateMachine = stateMachine;
     }
 
-    FileStateEnum(Integer code, String stateMachine , String description) {
+    FileStateEnum(Integer code, String stateMachine, String description) {
         this.code = code;
         this.stateMachine = stateMachine;
         this.description = description;
@@ -101,11 +101,9 @@ public enum FileStateEnum {
      * @return String 文件状态描述
      */
     public static String getStateMachine(Integer code) {
-        if (code != null) {
-            for (FileStateEnum fileStateEnum : FileStateEnum.values()) {
-                if (fileStateEnum.getCode().equals(code)) {
-                    return fileStateEnum.getStateMachine();
-                }
+        for (FileStateEnum fileStateEnum : FileStateEnum.values()) {
+            if (fileStateEnum.getCode().equals(code)) {
+                return fileStateEnum.getStateMachine();
             }
         }
         return null;
@@ -114,7 +112,7 @@ public enum FileStateEnum {
     /**
      * 获取所有文件状态值
      *
-     * @return  状态码集合
+     * @return 状态码集合
      */
     public static Set<Integer> getAllValue() {
         Set<Integer> allValues = new HashSet<>();

@@ -1,12 +1,12 @@
 /**
  * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,13 +18,12 @@ package org.dubhe.admin.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.dubhe.admin.dao.AuthCodeMapper;
+import org.dubhe.admin.dao.AuthGroupMapper;
 import org.dubhe.admin.dao.PermissionMapper;
-import org.dubhe.admin.domain.dto.PermissionCreateDTO;
-import org.dubhe.admin.domain.dto.PermissionDeleteDTO;
-import org.dubhe.admin.domain.dto.PermissionQueryDTO;
-import org.dubhe.admin.domain.dto.PermissionUpdateDTO;
+import org.dubhe.admin.domain.dto.*;
 import org.dubhe.admin.domain.entity.Permission;
 import org.dubhe.admin.domain.vo.PermissionVO;
 import org.dubhe.admin.service.PermissionService;
@@ -33,6 +32,8 @@ import org.dubhe.biz.base.context.UserContext;
 import org.dubhe.biz.base.exception.BusinessException;
 import org.dubhe.biz.base.service.UserContextService;
 import org.dubhe.biz.base.utils.StringUtils;
+import org.dubhe.biz.db.utils.PageDTO;
+import org.dubhe.biz.db.utils.PageUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,42 +58,36 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     private PermissionConvert permissionConvert;
 
     @Autowired
-    private AuthCodeMapper authCodeMapper;
+    private AuthGroupMapper authGroupMapper;
 
     /**
-     *
      * 获取权限列表
-     * @param pid 权限父id
-     * @return java.util.List 权限列表
      */
     @Override
     public List<Permission> findByPid(long pid) {
         return permissionMapper.findByPid(pid);
     }
 
+    public List<PermissionTreeDTO> getPermissionTree(Long pid) {
+        List<Permission> permissions = permissionMapper.selectList(new QueryWrapper<>());
+        return getPermissionTree(permissions, pid);
+    }
+
     /**
      * 获取权限树
-     *
-     * @param permissions 权限列表
-     * @return Object 权限树列表结构
      */
-    @Override
-    public Object getPermissionTree(List<Permission> permissions) {
-        List<Map<String, Object>> list = new LinkedList<>();
-        permissions.forEach(permission -> {
-                    if (permission != null) {
-                        List<Permission> authList = permissionMapper.findByPid(permission.getId());
-                        Map<String, Object> map = new HashMap<>(16);
-                        map.put("id", permission.getId());
-                        map.put("permission", permission.getPermission());
-                        map.put("label", permission.getName());
-                        if (CollUtil.isNotEmpty(authList)) {
-                            map.put("children", getPermissionTree(authList));
-                        }
-                        list.add(map);
-                    }
-                }
-        );
+    private List<PermissionTreeDTO> getPermissionTree(List<Permission> permissions, Long pid) {
+        List<PermissionTreeDTO> list = new LinkedList<>();
+        for (Permission permission : permissions) {
+            if (permission != null && pid.equals(permission.getPid())) {
+                PermissionTreeDTO dto = new PermissionTreeDTO();
+                dto.setId(permission.getId());
+                dto.setPermission(permission.getPermission());
+                dto.setLabel(permission.getName());
+                dto.setChildren(getPermissionTree(permissions, permission.getId()));
+                list.add(dto);
+            }
+        }
         return list;
     }
 
@@ -103,7 +98,7 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
      * @return Map<String, Object>
      */
     @Override
-    public Map<String, Object> queryAll(PermissionQueryDTO permissionQueryDTO) {
+    public PageDTO<PermissionVO> queryAll(PermissionQueryDTO permissionQueryDTO) {
         LambdaQueryWrapper<Permission> queryWrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotEmpty(permissionQueryDTO.getKeyword())) {
             queryWrapper.and(x -> x.like(Permission::getName, permissionQueryDTO.getKeyword()).or().like(Permission::getPermission, permissionQueryDTO.getKeyword()));
@@ -113,7 +108,7 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         return buildTree(permissionConvert.toDto(permissions));
     }
 
-    private Map<String, Object> buildTree(List<PermissionVO> permissions) {
+    private PageDTO<PermissionVO> buildTree(List<PermissionVO> permissions) {
         List<PermissionVO> trees = new ArrayList<>();
         Set<Long> ids = new HashSet<>();
         for (PermissionVO permissionVO : permissions) {
@@ -132,19 +127,10 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
 
         }
 
-        Map<String, Object> map = new HashMap<>(2);
         if (trees.size() == 0) {
             permissions.stream().filter(x -> !ids.contains(x.getId())).collect(Collectors.toList());
         }
-
-        Map<String, Object> page = new HashMap<>(3);
-        page.put("current", 1);
-        page.put("size", permissions.size());
-        page.put("total", permissions.size());
-
-        map.put("result", trees);
-        map.put("page", page);
-        return map;
+        return PageUtil.toPage(new Page(1, permissions.size()), trees);
     }
 
     /**
@@ -191,26 +177,22 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
 
     /**
      * 删除权限
-     *
-     * @param permissionDeleteDTO 删除权限DTO
      */
     @Override
     public void delete(PermissionDeleteDTO permissionDeleteDTO) {
-        Set<Long> ids = new HashSet<>();
+        Set<Long> ids = new HashSet<>(permissionDeleteDTO.getIds());
         List<Permission> permissions = permissionMapper.selectList(new LambdaQueryWrapper<Permission>().in(Permission::getId, permissionDeleteDTO.getIds()));
-        if (CollUtil.isNotEmpty(permissions)) {
-            for (Permission permission : permissions) {
-                if (permission.getPid() == 0) {
-                    List<Permission> permissionList = permissionMapper.findByPid(permission.getId());
-                    permissionList.forEach(x -> {
-                        ids.add(x.getId());
-                    });
-                }
-                ids.add(permission.getId());
-            }
+        Queue<Permission> queue= new LinkedList(permissions);
+        while (!queue.isEmpty()){
+            Permission permission = queue.poll();
+            List<Permission> permissionList = permissionMapper.findByPid(permission.getId());
+            permissionList.forEach(x -> {
+                ids.add(x.getId());
+                queue.add(x);
+            });
         }
         //解绑权限组权限
-        authCodeMapper.untiedByPermissionId(ids);
+        authGroupMapper.untiedByPermissionId(ids);
         permissionMapper.deleteBatchIds(ids);
     }
 }

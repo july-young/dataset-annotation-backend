@@ -1,12 +1,12 @@
 /**
  * Copyright 2019-2020 Zheng Jie
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,13 +19,10 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.dubhe.admin.dao.MenuMapper;
-import org.dubhe.admin.domain.dto.ExtConfigDTO;
-import org.dubhe.admin.domain.dto.MenuCreateDTO;
-import org.dubhe.admin.domain.dto.MenuDTO;
-import org.dubhe.admin.domain.dto.MenuQueryDTO;
-import org.dubhe.admin.domain.dto.MenuUpdateDTO;
-import org.dubhe.admin.domain.dto.RoleSmallDTO;
+import org.dubhe.admin.domain.dto.*;
 import org.dubhe.admin.domain.entity.Menu;
 import org.dubhe.admin.domain.vo.MenuMetaVo;
 import org.dubhe.admin.domain.vo.MenuVo;
@@ -37,6 +34,8 @@ import org.dubhe.biz.base.enums.SwitchEnum;
 import org.dubhe.biz.base.exception.BusinessException;
 import org.dubhe.biz.base.utils.StringUtils;
 import org.dubhe.biz.db.constant.PermissionConstant;
+import org.dubhe.biz.db.utils.PageDTO;
+import org.dubhe.biz.db.utils.PageUtil;
 import org.dubhe.biz.db.utils.WrapperHelp;
 import org.dubhe.biz.file.utils.DubheFileUtil;
 import org.dubhe.biz.log.enums.LogEnum;
@@ -47,16 +46,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 /**
  * @description 菜单服务 实现类
@@ -76,9 +68,6 @@ public class MenuServiceImpl implements MenuService {
 
     /**
      * 按条件查询菜单列表
-     *
-     * @param criteria 菜单请求实体
-     * @return java.util.List<org.dubhe.domain.dto.MenuDTO> 菜单返回实例
      */
     @Override
     public List<MenuDTO> queryAll(MenuQueryDTO criteria) {
@@ -150,13 +139,13 @@ public class MenuServiceImpl implements MenuService {
                 .sort(resources.getSort())
                 .type(resources.getType())
                 .build();
-        if(MenuTypeEnum.PAGE_TYPE.getValue().equals(resources.getType())){
+        if (MenuTypeEnum.PAGE_TYPE.getValue().equals(resources.getType())) {
             menu.setBackTo(resources.getBackTo());
             menu.setExtConfig(resources.getExtConfig());
         }
         menuMapper.insert(menu);
         //管理员新增默认权限
-        roleService.tiedRoleMenu(PermissionConstant.ADMIN_ROLE_ID,menu.getId());
+        roleService.tiedRoleMenu(PermissionConstant.ADMIN_ROLE_ID, menu.getId());
 
         return menuConvert.toDto(menu);
     }
@@ -202,9 +191,9 @@ public class MenuServiceImpl implements MenuService {
         menu.setHidden(resources.getHidden());
         menu.setComponentName(resources.getComponentName());
         menu.setPermission(resources.getPermission());
-        if(MenuTypeEnum.PAGE_TYPE.getValue().equals(resources.getType())){
+        if (MenuTypeEnum.PAGE_TYPE.getValue().equals(resources.getType())) {
             ExtConfigDTO extConfigDTO = analyzeBackToValue(resources.getExtConfig());
-            menu.setBackTo(Objects.isNull(extConfigDTO)?null:extConfigDTO.getBackTo());
+            menu.setBackTo(Objects.isNull(extConfigDTO) ? null : extConfigDTO.getBackTo());
             menu.setExtConfig(resources.getExtConfig());
         }
         menuMapper.updateById(menu);
@@ -215,88 +204,74 @@ public class MenuServiceImpl implements MenuService {
      * 解析扩展配置中 backTO 属性值
      *
      * @param extConfig 扩展配置
-     * @return  ExtConfigDTO扩展配置
+     * @return ExtConfigDTO扩展配置
      */
-    private ExtConfigDTO analyzeBackToValue(String extConfig){
+    private ExtConfigDTO analyzeBackToValue(String extConfig) {
         ExtConfigDTO dto = ExtConfigDTO.builder().build();
         try {
-            if(!Objects.isNull(extConfig)){
+            if (extConfig != null) {
                 dto = JSONObject.parseObject(extConfig, ExtConfigDTO.class);
             }
-        }catch (Exception e){
-            LogUtil.error(LogEnum.SYS_ERR,"analyzeBackToValue error, params:{} , error:{}",JSONObject.toJSONString(extConfig),e);
+        } catch (Exception e) {
+            LogUtil.error(LogEnum.SYS_ERR, "analyzeBackToValue error, params:{} , error:{}", extConfig, e);
         }
         return dto;
     }
 
-    /**
-     * 查询可删除的菜单
-     *
-     * @param menuList
-     * @param menuSet
-     * @return java.util.Set<org.dubhe.domain.entity.Menu>
-     */
-    @Override
-    public Set<Menu> getDeleteMenus(List<Menu> menuList, Set<Menu> menuSet) {
-        // 递归找出待删除的菜单
-        for (Menu menu1 : menuList) {
-            menuSet.add(menu1);
-            List<Menu> menus = menuMapper.findByPid(menu1.getId());
-            if (menus != null && menus.size() != 0) {
-                getDeleteMenus(menus, menuSet);
-            }
-        }
-        return menuSet;
-    }
-
-    /**
-     * 删除菜单
-     *
-     * @param menuSet 删除菜单请求集合
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void delete(Set<Menu> menuSet) {
-        for (Menu menu : menuSet) {
-            roleService.untiedMenu(menu.getId());
-            menuMapper.updateById(
-                    Menu.builder()
-                            .id(menu.getId())
-                            .deleted(SwitchEnum.getBooleanValue(SwitchEnum.ON.getValue())).build()
-            );
-        }
+    public void delete(Set<Long> ids) {
+        List<Menu> menus = menuMapper.selectList(new QueryWrapper<>());
+
+        menus = menus.stream().sorted(Comparator.comparing(Menu::getPid)).collect(Collectors.toList());
+        boolean next = false;
+        do {
+            for (int i = 0; i < menus.size(); ) {
+                if (ids.contains(menus.get(i).getPid())) {
+                    next = true;
+                    ids.add(menus.get(i).getId());
+                    menus.remove(i);
+                } else {
+                    i++;
+                }
+            }
+        } while (next);
+
+        roleService.untiedMenu(ids);
+        menuMapper.deleteBatchIds(ids);
     }
 
     /**
      * 获取菜单树
-     *
-     * @param menus 菜单列表
-     * @return java.lang.Object 菜单树结构列表
      */
     @Override
-    public Object getMenuTree(List<Menu> menus) {
-        List<Map<String, Object>> list = new LinkedList<>();
-        menus.forEach(menu -> {
-                    if (menu != null) {
-                        List<Menu> menuList = menuMapper.findByPid(menu.getId());
-                        Map<String, Object> map = new HashMap<>(16);
-                        map.put("id", menu.getId());
-                        map.put("label", menu.getName());
-                        if (menuList != null && menuList.size() != 0) {
-                            map.put("children", getMenuTree(menuList));
-                        }
-                        list.add(map);
-                    }
-                }
-        );
-        return list;
+    public List<MenuTreeDTO> getMenuTree() {
+
+        List<Menu> menusAll = menuMapper.selectList(new QueryWrapper<>());
+        menusAll = new LinkedList<>(menusAll);
+        List<MenuTreeDTO> menuTreeDTOList = buildMenuTree(menusAll, 0L);
+        return menuTreeDTOList;
     }
+
+    private List<MenuTreeDTO> buildMenuTree(List<Menu> menus, Long pid) {
+
+        List<MenuTreeDTO> menuTreeDTOList = new ArrayList<>();
+        for (int i = 0; i < menus.size(); i++) {
+            Menu menu = menus.get(i);
+            if (menu.getPid().equals(pid)) {
+                MenuTreeDTO dto = new MenuTreeDTO();
+                dto.setId(menu.getId());
+                dto.setLabel(menu.getName());
+                menuTreeDTOList.add(dto);
+                dto.setChildren(buildMenuTree(menus, menu.getId()));
+            }
+        }
+        return menuTreeDTOList;
+    }
+
 
     /**
      * 根据ID获取菜单列表
-     *
-     * @param pid id
-     * @return java.util.List<org.dubhe.domain.entity.Menu> 菜单返回列表
      */
     @Override
     public List<Menu> findByPid(long pid) {
@@ -306,19 +281,17 @@ public class MenuServiceImpl implements MenuService {
 
     /**
      * 构建菜单树
-     *
-     * @param menuDtos 菜单请求实体
-     * @return java.util.Map<java.lang.String, java.lang.Object>  菜单树结构
      */
     @Override
-    public Map<String, Object> buildTree(List<MenuDTO> menuDtos) {
+    public PageDTO<MenuDTO> buildTree(List<MenuDTO> menuDTOList) {
+
         List<MenuDTO> trees = new ArrayList<>();
         Set<Long> ids = new HashSet<>();
-        for (MenuDTO menuDTO : menuDtos) {
+        for (MenuDTO menuDTO : menuDTOList) {
             if (menuDTO.getPid() == 0) {
                 trees.add(menuDTO);
             }
-            for (MenuDTO it : menuDtos) {
+            for (MenuDTO it : menuDTOList) {
                 if (it.getPid().equals(menuDTO.getId())) {
                     if (menuDTO.getChildren() == null) {
                         menuDTO.setChildren(new ArrayList<>());
@@ -328,33 +301,24 @@ public class MenuServiceImpl implements MenuService {
                 }
             }
         }
-        Map<String, Object> map = new HashMap<>(2);
         if (trees.size() == 0) {
-            trees = menuDtos.stream().filter(s -> !ids.contains(s.getId())).collect(Collectors.toList());
+            trees = menuDTOList.stream().filter(s -> !ids.contains(s.getId())).collect(Collectors.toList());
         }
-        // MenuTree 不分页，结构保持一致
-        Map<String, Object> page = new HashMap<>(2);
-        page.put("current", 1);
-        page.put("size", menuDtos.size());
-        page.put("total", menuDtos.size());
 
-        map.put("result", trees);
-        map.put("page", page);
-
-        return map;
+        return PageUtil.toPage(new Page(1, trees.size()), trees);
     }
 
 
     /**
      * 构建菜单树
      *
-     * @param menuDtos 菜单请求实体
+     * @param menuDTOList 菜单请求实体
      * @return java.util.List<org.dubhe.domain.vo.MenuVo> 菜单树返回实例
      */
     @Override
-    public List<MenuVo> buildMenus(List<MenuDTO> menuDtos) {
+    public List<MenuVo> buildMenus(List<MenuDTO> menuDTOList) {
         List<MenuVo> list = new LinkedList<>();
-        menuDtos.forEach(menuDTO -> {
+        menuDTOList.forEach(menuDTO -> {
                     if (menuDTO != null) {
                         List<MenuDTO> menuDtoList = menuDTO.getChildren();
                         MenuVo menuVo = new MenuVo();
@@ -363,7 +327,7 @@ public class MenuServiceImpl implements MenuService {
                         menuVo.setPath(menuDTO.getPid() == 0 ? "/" + menuDTO.getPath() : menuDTO.getPath());
                         menuVo.setHidden(menuDTO.getHidden());
                         // 如果不是外链
-                        if (MenuTypeEnum.LINK_TYPE.getValue().compareTo(menuDTO.getType()) != 0) {
+                        if (!MenuTypeEnum.LINK_TYPE.getValue().equals(menuDTO.getType())) {
                             if (menuDTO.getPid() == 0) {
                                 menuVo.setComponent(StrUtil.isEmpty(menuDTO.getComponent()) ? "Layout" : menuDTO.getComponent());
                             } else if (!StrUtil.isEmpty(menuDTO.getComponent())) {
@@ -378,7 +342,7 @@ public class MenuServiceImpl implements MenuService {
                             MenuVo menuVo1 = new MenuVo();
                             menuVo1.setMeta(menuVo.getMeta());
                             // 非外链
-                            if (MenuTypeEnum.LINK_TYPE.getValue().compareTo(menuDTO.getType()) != 0) {
+                            if (!MenuTypeEnum.LINK_TYPE.getValue().equals(menuDTO.getType())) {
                                 menuVo1.setPath(menuVo.getPath());
                                 menuVo1.setName(menuVo.getName());
                                 menuVo1.setComponent(menuVo.getComponent());
@@ -403,9 +367,6 @@ public class MenuServiceImpl implements MenuService {
 
     /**
      * 获取菜单
-     *
-     * @param id 菜单id
-     * @return org.dubhe.domain.entity.Menu 菜单返回实例
      */
     @Override
     public Menu findOne(Long id) {

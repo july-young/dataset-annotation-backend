@@ -17,7 +17,7 @@ spring:
   redis:
     #数据库索引
     database: 7
-    host: 10.255.198.101
+    host: 192.168.199.187
     port: 6379
     password:
     #连接超时时间
@@ -62,19 +62,19 @@ spring:
 
 #logback
 logging.config:
-  classpath:logback.xml
+  classpath:logback-spring.xml
 
 # 文件存储服务配置
 storage:
   # 文件存储服务暴露的IP地址 如需测试需修改为合适的地址
-  file-store: 10.255.198.101
+  file-store: 192.168.199.187
   # 文件存储服务端 共享目录
   file-store-root-path: /nfs/
   file-store-root-windows-path: "Z:"
 
 # minio配置
 minio:
-  url: http://10.255.198.101:9000/
+  url: http://192.168.199.187:9000/
   accessKey: admin
   secretKey: 123@abc.com
   bucketName: dubhe-cloud-test
@@ -125,10 +125,3 @@ feign:
 unittest:
   username: admin
   password: admin
-
-user:
-  config:
-    notebook-delay-delete-time: 8
-    cpu-limit: 10
-    memory-limit: 32
-    gpu-limit: 2

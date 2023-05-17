@@ -23,6 +23,7 @@ import org.dubhe.admin.domain.entity.Role;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -75,10 +76,8 @@ public interface RoleService extends IService<Role> {
 
     /**
      * 删除角色菜单
-     *
-     * @param id 角色id
      */
-    void untiedMenu(Long id);
+    void untiedMenu(Collection<Long> ids);
 
     /**
      * 按条件查询角色信息
@@ -120,16 +119,6 @@ public interface RoleService extends IService<Role> {
      * @return java.util.List<org.dubhe.domain.dto.RoleSmallDTO> 角色列表
      */
     List<RoleSmallDTO> getRoleByUserId( Long userId);
-
-    /**
-     * 获取角色列表
-     *
-     * @param userId 用户ID
-     * @param teamId 团队ID
-     * @return java.util.List<org.dubhe.domain.dto.RoleSmallDTO> 角色列表
-     */
-    List<RoleSmallDTO> getRoleByUserIdAndTeamId( Long userId,Long teamId);
-
 
     /**
      * 新增角色菜单

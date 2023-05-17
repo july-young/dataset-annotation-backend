@@ -1,19 +1,4 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
+
 package org.dubhe.data.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -76,7 +61,7 @@ public interface DataFileAnnotationMapper  extends BaseMapper<DataFileAnnotation
      * @param datasetId         数据集Id
      * @return List<DatasetVersionFileDTO>
      */
-    List<DataFileAnnotation> getLabelIdByDatasetIdAndVersionId(@Param("labelId") Long[] labelId, @Param("datasetId")Long datasetId, @Param("offset") Long offset,
+    List<DataFileAnnotation> getLabelIdByDatasetIdAndVersionId(@Param("labelIdList") List<Long> labelIdList, @Param("datasetId")Long datasetId, @Param("offset") Long offset,
                                                                @Param("limit") Integer limit, @Param("versionName") String versionName);
 
     /**
@@ -130,5 +115,5 @@ public interface DataFileAnnotationMapper  extends BaseMapper<DataFileAnnotation
      * @param versionName       版本名称
      * @param labelIds           标签id
      */
-    Long selectDetectionCount(@Param("datasetId")Long datasetId, @Param("versionName")String versionName, @Param("labelIds")Long[] labelIds);
+    Long selectDetectionCount(@Param("datasetId")Long datasetId, @Param("versionName")String versionName, @Param("labelIds")List<Long> labelIds);
 }

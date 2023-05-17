@@ -1,20 +1,3 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
-
 package org.dubhe.task.execute.impl;
 
 import com.alibaba.fastjson.JSON;
@@ -67,17 +50,11 @@ public class TextClassificationQueueExecute extends AbstractAlgorithmExecute {
 
     @Override
     public void finishExecute(JSONObject taskDetail) {
-        JSONObject jsonObject = JSON.parseObject(taskDetail.get("object").toString(),JSONObject.class);
         TaskSplitBO taskSplitBO = JSON.parseObject(JSON.toJSONString(taskDetail), TaskSplitBO.class);
-        JSONArray jsonArray = jsonObject.getJSONArray("annotations");
-        List<AnnotationInfoCreateDTO> list = new ArrayList<>();
-        for (int i = 0; i < jsonArray.size(); i++) {
-            list.add(JSON.toJavaObject(jsonArray.getJSONObject(i), AnnotationInfoCreateDTO.class));
-        }
-        BatchAnnotationInfoCreateDTO batchAnnotationInfoCreateDTO = new BatchAnnotationInfoCreateDTO();
-        batchAnnotationInfoCreateDTO.setAnnotations(list);
+        BatchAnnotationInfoCreateDTO batchAnnotationInfoCreateDTO =annotationService.buildBatchAnnotationInfoCreateDTO(taskDetail);
+
         Map<Long, AnnotationInfoCreateDTO> res = annotationService.doFinishAuto(taskSplitBO, batchAnnotationInfoCreateDTO.toMap());
-        list = res.values().stream().collect(Collectors.toList());
+        List<AnnotationInfoCreateDTO> list = new ArrayList<>(res.values());
         list.forEach(annotationInfoCreateDTO -> {
             UpdateRequest updateRequest = new UpdateRequest(esIndex,"_doc"
                     ,annotationInfoCreateDTO.getId().toString());

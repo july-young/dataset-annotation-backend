@@ -1,9 +1,18 @@
 local namespace = KEYS[1]
 local finished_task_queue_name = "finished_task"
 local finished_task_queue = redis.call("get", namespace..":"..finished_task_queue_name)
+
+if not finished_task_queue then
+  return nil
+end
+
 local time = redis.call('TIME')
 local current_task_queue
 local keys = redis.call("keys",namespace..":*:*:finished:*")
+
+if not keys then
+  return nil
+end
 
 -- 定义分割字符串函数
 local __split

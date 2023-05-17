@@ -1,41 +1,29 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
-
 package org.dubhe.data.rest;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.dubhe.biz.base.constant.Permissions;
+import org.dubhe.biz.base.dto.DeleteDTO;
 import org.dubhe.biz.base.vo.DataResponseBody;
 import org.dubhe.biz.base.vo.DatasetVO;
+import org.dubhe.biz.base.vo.ProgressVO;
+import org.dubhe.biz.db.utils.PageDTO;
 import org.dubhe.data.constant.Constant;
 import org.dubhe.data.domain.dto.*;
+import org.dubhe.data.domain.entity.Dataset;
+import org.dubhe.data.domain.vo.DatasetCountVO;
 import org.dubhe.data.domain.vo.DatasetQueryDTO;
+import org.dubhe.data.domain.vo.IsImportVO;
 import org.dubhe.data.service.DatasetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-
+import java.util.Map;
 
 
 /**
@@ -53,29 +41,33 @@ public class DatasetController {
     @ApiOperation(value = "数据集创建")
     @PostMapping
     @PreAuthorize(Permissions.DATA)
-    public DataResponseBody createDataset(@Validated(DatasetCreateDTO.Create.class) @RequestBody DatasetCreateDTO datasetCreateDTO) {
-        return new DataResponseBody(datasetService.create(datasetCreateDTO));
+    public DataResponseBody create(@Validated(DatasetCreateDTO.Create.class) @RequestBody DatasetCreateDTO datasetCreateDTO) {
+        Long id = datasetService.create(datasetCreateDTO);
+        return new DataResponseBody(id);
     }
 
     @ApiOperation(value = "数据集查询")
     @GetMapping
     @PreAuthorize(Permissions.DATA)
-    public DataResponseBody query(Page page, DatasetQueryDTO datasetQueryDTO) {
-        return new DataResponseBody(datasetService.listVO(page, datasetQueryDTO));
+    public DataResponseBody<PageDTO<DatasetVO>> page(Page page, DatasetQueryDTO datasetQueryDTO) {
+        PageDTO<DatasetVO> pageDTO = datasetService.page(page, datasetQueryDTO);
+        return new DataResponseBody(pageDTO);
     }
 
     @ApiOperation(value = "数据集详情")
     @GetMapping(value = "/{datasetId}")
     @PreAuthorize(Permissions.DATA)
-    public DataResponseBody get(@PathVariable(name = "datasetId") Long datasetId) {
-        return new DataResponseBody(datasetService.get(datasetId));
+    public DataResponseBody<DatasetVO> get(@PathVariable(name = "datasetId") Long datasetId) {
+        DatasetVO datasetVO = datasetService.get(datasetId);
+        return new DataResponseBody(datasetVO);
     }
 
     @ApiOperation(value = "数据集进度")
     @GetMapping(value = "/progress")
     @PreAuthorize(Permissions.DATA)
-    public DataResponseBody progress(@RequestParam List<Long> datasetIds) {
-        return new DataResponseBody(datasetService.progress(datasetIds));
+    public DataResponseBody<Map<Long, ProgressVO>> progress(@RequestParam List<Long> datasetIds) {
+        Map<Long, ProgressVO> progressVOMap = datasetService.progress(datasetIds);
+        return new DataResponseBody(progressVOMap);
     }
 
     @ApiOperation(value = "数据集修改")
@@ -83,14 +75,15 @@ public class DatasetController {
     @PreAuthorize(Permissions.DATA)
     public DataResponseBody update(@PathVariable(name = "datasetId") Long datasetId,
                                    @Validated @RequestBody DatasetCreateDTO datasetCreateDTO) {
-        return new DataResponseBody(datasetService.update(datasetCreateDTO, datasetId));
+        boolean update = datasetService.update(datasetCreateDTO, datasetId);
+        return new DataResponseBody(update);
     }
 
     @ApiOperation(value = "数据集删除", notes = "数据集下的文件会同时被删除")
     @DeleteMapping
     @PreAuthorize(Permissions.DATA_DELETE)
-    public DataResponseBody delete(@Validated @RequestBody DatasetDeleteDTO datasetDeleteDTO) {
-        datasetService.delete(datasetDeleteDTO);
+    public DataResponseBody delete(@Validated @RequestBody DeleteDTO deleteDTO) {
+        datasetService.delete(deleteDTO.getIds());
         return new DataResponseBody();
     }
 
@@ -104,8 +97,9 @@ public class DatasetController {
     @ApiOperation(value = "数据集查询(有版本)")
     @GetMapping(value = "/versions/filter")
     @PreAuthorize(Permissions.DATA)
-    public DataResponseBody queryConfirmDatasetVersion(Page page, DatasetIsVersionDTO datasetIsVersionDTO) {
-        return new DataResponseBody(datasetService.dataVersionListVO(page, datasetIsVersionDTO));
+    public DataResponseBody<PageDTO<Dataset>> queryConfirmDatasetVersion(Page page, DatasetIsVersionDTO datasetIsVersionDTO) {
+        PageDTO<Dataset>  pageDTO = datasetService.dataVersionListVO(page, datasetIsVersionDTO);
+        return new DataResponseBody(pageDTO);
     }
 
     @ApiOperation(value = "数据集增强")
@@ -120,21 +114,24 @@ public class DatasetController {
     @GetMapping(value = "/count")
     @PreAuthorize(Permissions.DATA)
     public DataResponseBody queryDatasetsCount() {
-        return new DataResponseBody(datasetService.queryDatasetsCount());
+        DatasetCountVO datasetCountVO = datasetService.queryDatasetsCount();
+        return new DataResponseBody(datasetCountVO);
     }
 
     @ApiOperation(value = "查询数据集状态")
     @GetMapping(value = "/status")
     @PreAuthorize(Permissions.DATA)
     public DataResponseBody determineIfTheDatasetIsAnImport(@RequestParam List<Long> datasetIds) {
-        return new DataResponseBody(datasetService.determineIfTheDatasetIsAnImport(datasetIds));
+        Map<Long, IsImportVO> longIsImportVOMap = datasetService.determineIfTheDatasetIsAnImport(datasetIds);
+        return new DataResponseBody(longIsImportVOMap);
     }
 
     @ApiOperation(value = "导入用户自定义数据集")
     @PostMapping(value = "/custom")
     @PreAuthorize(Permissions.DATA)
     public DataResponseBody importDataset(@RequestBody DatasetCustomCreateDTO datasetCustomCreateDTO) {
-        return new DataResponseBody(datasetService.importDataset(datasetCustomCreateDTO));
+        Long datasetId = datasetService.importDataset(datasetCustomCreateDTO);
+        return new DataResponseBody(datasetId);
     }
 
     @ApiOperation(value = "数据集置顶")
@@ -158,13 +155,15 @@ public class DatasetController {
     @GetMapping(value = "/getConvertInfoByDatasetId")
     @PreAuthorize(Permissions.DATA)
     public DataResponseBody getConvertInfoByDatasetId(@RequestParam(value = "datasetId") Long datasetId) {
-        return new DataResponseBody(datasetService.getConvertInfoByDatasetId(datasetId));
+        Boolean converted = datasetService.getConvertInfoByDatasetId(datasetId);
+        return new DataResponseBody(converted);
     }
 
     @ApiOperation("获取预置数据集列表")
     @GetMapping(value = "/getPresetDataset")
     public DataResponseBody getPresetDataset() {
-        return new DataResponseBody(datasetService.getPresetDataset());
+        datasetService.getPresetDataset();
+        return new DataResponseBody();
     }
 
     @ApiOperation(value = "任务停止")
@@ -175,7 +174,7 @@ public class DatasetController {
         return new DataResponseBody();
     }
 
-    @ApiOperation(value = "ofrecord停止")
+    @ApiOperation(value = "ofRecord停止")
     @PutMapping(value = "/ofRecord/{datasetId}/stop")
     @PreAuthorize(Permissions.DATA)
     public DataResponseBody ofRecordStop(@PathVariable(name = "datasetId") Long datasetId,@RequestParam(name="version")String version) {
@@ -186,6 +185,7 @@ public class DatasetController {
     @ApiOperation("获取指定名称预置数据集(远程调用)")
     @GetMapping(value = "/getPresetDatasetByName")
     public DataResponseBody<DatasetVO> getPresetDatasetByName(@RequestParam String datasetName) {
-        return new DataResponseBody(datasetService.getPresetDatasetByName(datasetName));
+        DatasetVO datasetVO = datasetService.getPresetDatasetByName(datasetName);
+        return new DataResponseBody(datasetVO);
     }
 }

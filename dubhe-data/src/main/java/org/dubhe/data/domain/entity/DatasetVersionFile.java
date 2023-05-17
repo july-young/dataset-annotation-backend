@@ -1,12 +1,12 @@
 /**
  * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,8 @@
 
 package org.dubhe.data.domain.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -53,7 +55,7 @@ public class DatasetVersionFile {
     @ApiModelProperty("文件ID")
     private Long fileId;
 
-    @ApiModelProperty("文件状态 0:新增文件 1:删除文件 2:正常文件")
+    @ApiModelProperty("文件状态 0:新增 1:删除 ")
     private Integer status;
 
     @ApiModelProperty("标注状态")
@@ -69,7 +71,6 @@ public class DatasetVersionFile {
     private String fileName;
 
 
-
     public DatasetVersionFile() {
     }
 
@@ -79,24 +80,16 @@ public class DatasetVersionFile {
         this.fileId = fileId;
         this.status = 0;
         this.changed = StringUtils.isBlank(versionName) ? Constant.UNCHANGED : Constant.CHANGED;
-        this.fileName=fileName;
+        this.fileName = fileName;
     }
 
-    public DatasetVersionFile(Long datasetId, String versionName, Long fileId, Integer annotationStatus,String fileName,Integer changed) {
+    public DatasetVersionFile(Long datasetId, String versionName, Long fileId, Integer annotationStatus, String fileName, Integer changed) {
         this.datasetId = datasetId;
         this.versionName = versionName;
         this.fileId = fileId;
         this.status = 0;
         this.annotationStatus = annotationStatus;
-        this.fileName=fileName;
-        this.changed=changed;
-    }
-
-    public DatasetVersionFile(Long datasetId, String versionName, Long fileId, int status) {
-        this.datasetId = datasetId;
-        this.versionName = versionName;
-        this.fileId = fileId;
-        this.status = 0;
+        this.fileName = fileName;
         this.changed = changed;
     }
 

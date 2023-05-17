@@ -1,31 +1,20 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
+
 package org.dubhe.admin.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.dubhe.admin.dao.DictDetailMapper;
 import org.dubhe.admin.dao.DictMapper;
 import org.dubhe.admin.domain.dto.*;
 import org.dubhe.admin.domain.entity.Dict;
+import org.dubhe.admin.domain.entity.DictDetail;
 import org.dubhe.admin.service.DictService;
 import org.dubhe.admin.service.convert.DictConvert;
+import org.dubhe.biz.base.dto.DictDetailDTO;
 import org.dubhe.biz.base.exception.BusinessException;
+import org.dubhe.biz.db.utils.PageDTO;
 import org.dubhe.biz.db.utils.PageUtil;
 import org.dubhe.biz.db.utils.WrapperHelp;
 import org.dubhe.biz.file.utils.DubheFileUtil;
@@ -63,7 +52,7 @@ public class DictServiceImpl implements DictService {
      * @return java.util.Map<java.lang.String, java.lang.Object> 字典分页实例
      */
     @Override
-    public Map<String, Object> queryAll(DictQueryDTO criteria, Page<Dict> page) {
+    public PageDTO<DictDTO> page(DictQueryDTO criteria, Page<Dict> page) {
         IPage<Dict> dicts = dictMapper.selectCollPage(page, WrapperHelp.getWrapper(criteria));
         return PageUtil.toPage(dicts, dictConvert::toDto);
     }
@@ -71,13 +60,10 @@ public class DictServiceImpl implements DictService {
 
     /**
      * 按条件查询字典列表
-     *
-     * @param criteria 字典查询实体
-     * @return java.util.List<org.dubhe.domain.dto.DictDTO> 字典实例
      */
     @Override
-    public List<DictDTO> queryAll(DictQueryDTO criteria) {
-        List<Dict> list = dictMapper.selectCollList(WrapperHelp.getWrapper(criteria));
+    public List<DictDTO> list(DictQueryDTO dictQueryDTO) {
+        List<Dict> list = dictMapper.selectCollList(WrapperHelp.getWrapper(dictQueryDTO));
         return dictConvert.toDto(list);
     }
 
@@ -123,8 +109,8 @@ public class DictServiceImpl implements DictService {
         // 级联保存子表
         resources.getDictDetails().forEach(detail -> {
             detail.setDictId(dict.getId());
-            dictDetailMapper.insert(detail);
         });
+        dictDetailMapper.insertBatchSomeColumn(resources.getDictDetails());
         return dictConvert.toDto(dict);
     }
 
@@ -152,7 +138,6 @@ public class DictServiceImpl implements DictService {
             } else {
                 dictDetailMapper.updateById(detail);
             }
-
         });
     }
 
@@ -166,11 +151,17 @@ public class DictServiceImpl implements DictService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteAll(Set<Long> ids) {
-        for (Long id : ids) {
-            dictMapper.deleteById(id);
-            dictDetailMapper.deleteByDictId(id);
-        }
+        dictMapper.deleteBatchIds(ids);
+        deleteDictDetailByDictId(ids);
     }
+
+    private void deleteDictDetailByDictId(Collection<Long> ids){
+        LambdaQueryWrapper<DictDetail> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.in(DictDetail::getDictId,ids);
+        dictDetailMapper.delete(queryWrapper);
+    }
+
+
 
     /**
      * 字典导出

@@ -1,19 +1,4 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
+
 
 package org.dubhe.data.domain.dto;
 
@@ -62,9 +47,6 @@ public class DatasetCreateDTO implements Serializable {
             message = "类型参数不对,请使用 0-私有数据,  1-团队数据  2-公开数据", groups = Create.class)
     private Integer type;
 
-    @ApiModelProperty(notes = "团队编号")
-    private Long teamId;
-
     @ApiModelProperty(notes = "数据类型:0图片，1视频, 2文本")
     @NotNull(message = "数据类型不能为空", groups = Create.class)
     @EnumValue(enumClass = DatatypeEnum.class, enumMethod = "isValid", message = Constant.DATA_TYPE_RULE, groups = Create.class)
@@ -96,9 +78,6 @@ public class DatasetCreateDTO implements Serializable {
 
     /**
      * DatasetCreateDTO 转换Dataset
-     *
-     * @param datasetCreateDTO  数据集创建DTO
-     * @return  数据集
      */
     public static Dataset from(DatasetCreateDTO datasetCreateDTO) {
         Dataset dataset = new Dataset(datasetCreateDTO);
@@ -109,9 +88,6 @@ public class DatasetCreateDTO implements Serializable {
 
     /**
      * 更新数据集
-     *
-     * @param datasetCreateDTO 数据集创建DTO
-     * @return 数据集
      */
     public static Dataset update(DatasetCreateDTO datasetCreateDTO) {
         return new Dataset(datasetCreateDTO);

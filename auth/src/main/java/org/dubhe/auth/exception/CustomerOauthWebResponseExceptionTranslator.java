@@ -1,21 +1,4 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
 package org.dubhe.auth.exception;
-
 
 
 import org.springframework.http.HttpHeaders;
@@ -35,7 +18,6 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import java.io.IOException;
 
 
-
 /**
  * @description 异常捕获并通过CustomerOauthException处理
  * @date 2020-12-21
@@ -47,31 +29,31 @@ public class CustomerOauthWebResponseExceptionTranslator implements WebResponseE
     @Override
     public ResponseEntity<OAuth2Exception> translate(Exception e) throws Exception {
         Throwable[] causeChain = throwableAnalyzer.determineCauseChain(e);
-        Exception ase=null;
+        Exception ase = null;
 
         // 异常栈获取 OAuth2Exception 异常
-        ase = (OAuth2Exception) throwableAnalyzer.getFirstThrowableOfType(
-                OAuth2Exception.class, causeChain);
+        ase = (OAuth2Exception) throwableAnalyzer.getFirstThrowableOfType
+                (OAuth2Exception.class, causeChain);
         // 异常栈中有OAuth2Exception
         if (ase != null) {
             return handleOAuth2Exception((OAuth2Exception) ase);
         }
 
-        ase = (AuthenticationException) throwableAnalyzer.getFirstThrowableOfType(AuthenticationException.class,
-                causeChain);
+        ase = (AuthenticationException) throwableAnalyzer.getFirstThrowableOfType
+                (AuthenticationException.class, causeChain);
         if (ase != null) {
             return handleOAuth2Exception(new UnauthorizedException(e.getMessage(), e));
         }
 
-        ase = (AccessDeniedException) throwableAnalyzer
-                .getFirstThrowableOfType(AccessDeniedException.class, causeChain);
-        if (ase instanceof AccessDeniedException) {
+        ase = (AccessDeniedException) throwableAnalyzer.getFirstThrowableOfType
+                (AccessDeniedException.class, causeChain);
+        if (ase != null) {
             return handleOAuth2Exception(new ForbiddenException(ase.getMessage(), ase));
         }
 
-        ase = (HttpRequestMethodNotSupportedException) throwableAnalyzer
-                .getFirstThrowableOfType(HttpRequestMethodNotSupportedException.class, causeChain);
-        if (ase instanceof HttpRequestMethodNotSupportedException) {
+        ase = (HttpRequestMethodNotSupportedException) throwableAnalyzer.getFirstThrowableOfType
+                (HttpRequestMethodNotSupportedException.class, causeChain);
+        if (ase != null) {
             return handleOAuth2Exception(new MethodNotAllowed(ase.getMessage(), ase));
         }
 
@@ -90,8 +72,7 @@ public class CustomerOauthWebResponseExceptionTranslator implements WebResponseE
         }
         CustomerOauthException exception = new CustomerOauthException(e.getMessage(), e);
 
-        ResponseEntity<OAuth2Exception> response = new ResponseEntity<OAuth2Exception>(exception, headers,
-                HttpStatus.OK);
+        ResponseEntity<OAuth2Exception> response = new ResponseEntity<OAuth2Exception>(exception, headers, HttpStatus.OK);
 
         return response;
 

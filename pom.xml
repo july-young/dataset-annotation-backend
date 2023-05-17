@@ -83,7 +83,6 @@
         <tomcat.annotations-api.version>6.0.53</tomcat.annotations-api.version>
 
         <!-- 自定义模块依赖 -->
-        <org.dubhe.common-k8s.version>1.0.1-SNAPSHOT</org.dubhe.common-k8s.version>
         <org.dubhe.common-recycle.version>1.0.1-SNAPSHOT</org.dubhe.common-recycle.version>
 
         <!-- 业务自定义模块依赖 -->

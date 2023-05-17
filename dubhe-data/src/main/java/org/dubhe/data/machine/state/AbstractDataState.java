@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
 package org.dubhe.data.machine.state;
 
 import org.dubhe.data.domain.entity.Dataset;
@@ -29,7 +13,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void sampledEvent(Integer primaryKeyId) {
+    public void sampledEvent(Long primaryKeyId) {
     }
 
     /**
@@ -37,7 +21,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void samplingEvent(Integer primaryKeyId) {
+    public void samplingEvent(Long primaryKeyId) {
     }
 
     /**
@@ -45,7 +29,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void samplingFailureEvent(Integer primaryKeyId) {
+    public void samplingFailureEvent(Long primaryKeyId) {
     }
 
     /**
@@ -53,7 +37,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void autoAnnotationEvent(Integer primaryKeyId) {
+    public void autoAnnotationEvent(Long primaryKeyId) {
     }
 
     /**
@@ -61,7 +45,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void manualAnnotationCompleteEvent(Integer primaryKeyId) {
+    public void manualAnnotationCompleteEvent(Long primaryKeyId) {
     }
 
     /**
@@ -69,7 +53,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void manualAutomaticLabelingCompletionEvent(Integer primaryKeyId) {
+    public void manualAutomaticLabelingCompletionEvent(Long primaryKeyId) {
     }
 
     /**
@@ -77,7 +61,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void manualNotMakedEvent(Integer primaryKeyId) {
+    public void manualNotMarkedEvent(Long primaryKeyId) {
     }
 
     /**
@@ -85,7 +69,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void automaticLabelingEvent(Integer primaryKeyId) {
+    public void automaticLabelingEvent(Long primaryKeyId) {
     }
 
     /**
@@ -101,7 +85,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void strengthenEvent(Integer primaryKeyId) {
+    public void strengthenEvent(Long primaryKeyId) {
     }
 
     /**
@@ -109,7 +93,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 数据集Id
      */
-    public void deletePictrueNotMarkedEvent(Integer primaryKeyId){
+    public void deletePictureNotMarkedEvent(Long primaryKeyId){
     }
 
     /**
@@ -117,7 +101,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void uploadPicturesEvent(Integer primaryKeyId) {
+    public void uploadPicturesEvent(Long primaryKeyId) {
     }
 
     /**
@@ -125,7 +109,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void uploadSavePicturesEvent(Integer primaryKeyId) {
+    public void uploadSavePicturesEvent(Long primaryKeyId) {
     }
 
     /**
@@ -133,7 +117,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void completeStrengthenEvent(Integer primaryKeyId) {
+    public void completeStrengthenEvent(Long primaryKeyId) {
     }
 
     /**
@@ -141,7 +125,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void deletePicturesEvent(Integer primaryKeyId) {
+    public void deletePicturesEvent(Long primaryKeyId) {
     }
 
     /**
@@ -149,7 +133,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void strengtheningCompleteEvent(Integer primaryKeyId) {
+    public void strengtheningCompleteEvent(Long primaryKeyId) {
     }
 
     /**
@@ -157,7 +141,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void strengtheningAutoCompleteEvent(Integer primaryKeyId) {
+    public void strengtheningAutoCompleteEvent(Long primaryKeyId) {
     }
 
     /**
@@ -165,7 +149,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void deleteAnnotatingEvent(Integer primaryKeyId) {
+    public void deleteAnnotatingEvent(Long primaryKeyId) {
     }
 
     /**
@@ -173,7 +157,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void autoTrackFailEvent(Integer primaryKeyId){
+    public void autoTrackFailEvent(Long primaryKeyId){
     }
 
     /**
@@ -181,7 +165,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void autoAnnotationsEvent(Integer primaryKeyId) {
+    public void autoAnnotationsEvent(Long primaryKeyId) {
     }
 
     /**
@@ -245,7 +229,7 @@ public abstract class AbstractDataState {
      *
      * @param primaryKeyId 业务ID
      */
-    public void tableImportEvent(Integer primaryKeyId) {
+    public void tableImportEvent(Long primaryKeyId) {
     }
 
     /**

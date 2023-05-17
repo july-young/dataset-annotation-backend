@@ -1,19 +1,4 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
+
 
 package org.dubhe.admin.service.impl;
 
@@ -65,46 +50,29 @@ public class MailServiceImpl implements MailService {
         mailSender.send(message);
     }
 
-    /**
-     * HTML 文本邮件
-     *
-     * @param to      接收者邮件
-     * @param subject 邮件主题
-     * @param contnet HTML内容
-     * @throws MessagingException
-     */
     @Override
-    public void sendHtmlMail(String to, String subject, String contnet) throws MessagingException {
+    public void sendHtmlMail(String to, String subject, String content) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
 
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setTo(to);
         helper.setSubject(subject);
-        helper.setText(contnet, true);
+        helper.setText(content, true);
         helper.setFrom(from);
 
         mailSender.send(message);
     }
 
 
-    /**
-     * 附件邮件
-     *
-     * @param to       接收者邮件
-     * @param subject  邮件主题
-     * @param contnet  HTML内容
-     * @param filePath 附件路径
-     * @throws MessagingException
-     */
     @Override
-    public void sendAttachmentsMail(String to, String subject, String contnet,
+    public void sendAttachmentsMail(String to, String subject, String content,
                                     String filePath) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
 
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setTo(to);
         helper.setSubject(subject);
-        helper.setText(contnet, true);
+        helper.setText(content, true);
         helper.setFrom(from);
 
         FileSystemResource file = new FileSystemResource(new File(filePath));

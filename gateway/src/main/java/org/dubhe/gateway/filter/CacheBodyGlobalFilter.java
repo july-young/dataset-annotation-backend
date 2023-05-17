@@ -16,6 +16,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  *@description 请求体过滤器(解决Post请求Body数据丢失问题)
@@ -49,7 +50,7 @@ public class CacheBodyGlobalFilter implements Ordered, GlobalFilter {
                         join.read(content);
                         //释放掉内存
                         DataBufferUtils.release(join);
-                        byte[] uppedContent = new String(content, Charset.forName("UTF-8")).getBytes();
+                        byte[] uppedContent = new String(content, StandardCharsets.UTF_8).getBytes();
                         return bufferFactory.wrap(uppedContent);
                     }));
                 }

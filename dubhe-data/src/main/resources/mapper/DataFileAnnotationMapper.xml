@@ -57,9 +57,9 @@
         LEFT JOIN data_dataset_version_file ddvf on dfa.version_file_id = ddvf.id
         where dfa.dataset_id = #{datasetId}
         and ddvf.dataset_id = #{datasetId}
-        <if test="labelId != null">
+        <if test="labelIdList != null and labelIdList.size() > 0">
             and dfa.label_id in
-            <foreach item="labelId" collection="labelId" separator="," open="(" close=")">
+            <foreach item="labelId" collection="labelIdList" separator="," open="(" close=")">
                 #{labelId}
             </foreach>
         </if>

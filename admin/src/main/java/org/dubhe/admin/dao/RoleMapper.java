@@ -1,19 +1,4 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
+
 package org.dubhe.admin.dao;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -59,7 +44,7 @@ public interface RoleMapper extends BaseMapper<Role> {
                             many = @Many(select = "org.dubhe.admin.dao.MenuMapper.selectByRoleId", fetchType = FetchType.LAZY)),
                     @Result(property = "auths",
                             column = "id",
-                            many = @Many(select = "org.dubhe.admin.dao.AuthCodeMapper.selectByRoleId", fetchType = FetchType.LAZY))})
+                            many = @Many(select = "org.dubhe.admin.dao.AuthGroupMapper.selectByRoleId", fetchType = FetchType.LAZY))})
     List<Role> selectCollList(@Param("ew") Wrapper<Role> queryWrapper);
 
     /**
@@ -151,13 +136,4 @@ public interface RoleMapper extends BaseMapper<Role> {
     @SelectProvider(type = RoleProvider.class, method = "findRolesByUserId")
     List<Role> findRolesByUserId(Long userId);
 
-    /**
-     * 根据团队ID和用户ID查询角色
-     *
-     * @param userId 用户ID
-     * @param teamId 团队ID
-     * @return List<Role> 角色列表
-     */
-    @SelectProvider(type = RoleProvider.class, method = "findByUserIdAndTeamId")
-    List<Role> findByUserIdAndTeamId(Long userId, Long teamId);
 }

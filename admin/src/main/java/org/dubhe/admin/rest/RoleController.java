@@ -24,7 +24,7 @@ import org.dubhe.admin.domain.dto.RoleDTO;
 import org.dubhe.admin.domain.dto.RoleDeleteDTO;
 import org.dubhe.admin.domain.dto.RoleQueryDTO;
 import org.dubhe.admin.domain.dto.RoleUpdateDTO;
-import org.dubhe.admin.service.AuthCodeService;
+import org.dubhe.admin.service.AuthGroupService;
 import org.dubhe.admin.service.RoleService;
 import org.dubhe.biz.base.constant.Permissions;
 import org.dubhe.biz.base.vo.DataResponseBody;
@@ -58,7 +58,7 @@ public class RoleController {
     private final RoleService roleService;
 
     @Autowired
-    private AuthCodeService authCodeService;
+    private AuthGroupService authGroupService;
 
     public RoleController(RoleService roleService) {
         this.roleService = roleService;
@@ -120,7 +120,7 @@ public class RoleController {
         if (Objects.isNull(role)) {
             throw new BadCredentialsException("请选择角色信息");
         }
-        authCodeService.updateRoleAuth(roleAuthUpdateDTO);
+        authGroupService.updateRoleAuth(roleAuthUpdateDTO);
         return new DataResponseBody();
     }
 

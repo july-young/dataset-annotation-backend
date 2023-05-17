@@ -15,10 +15,12 @@
  */
 package org.dubhe.admin.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.dubhe.admin.dao.RoleMapper;
+import org.dubhe.admin.dao.RoleMenuMapper;
 import org.dubhe.admin.domain.dto.RoleCreateDTO;
 import org.dubhe.admin.domain.dto.RoleDTO;
 import org.dubhe.admin.domain.dto.RoleQueryDTO;
@@ -26,6 +28,7 @@ import org.dubhe.admin.domain.dto.RoleSmallDTO;
 import org.dubhe.admin.domain.dto.RoleUpdateDTO;
 import org.dubhe.admin.domain.entity.Menu;
 import org.dubhe.admin.domain.entity.Role;
+import org.dubhe.admin.domain.entity.RoleMenu;
 import org.dubhe.admin.service.RoleService;
 import org.dubhe.admin.service.convert.RoleConvert;
 import org.dubhe.admin.service.convert.RoleSmallConvert;
@@ -33,6 +36,7 @@ import org.dubhe.biz.base.constant.UserConstant;
 import org.dubhe.biz.base.enums.BaseErrorCodeEnum;
 import org.dubhe.biz.base.enums.SwitchEnum;
 import org.dubhe.biz.base.exception.BusinessException;
+import org.dubhe.biz.db.utils.PageDTO;
 import org.dubhe.biz.db.utils.PageUtil;
 import org.dubhe.biz.db.utils.WrapperHelp;
 import org.dubhe.biz.file.utils.DubheFileUtil;
@@ -44,12 +48,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @description 角色服务 实现类
@@ -60,6 +59,9 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     @Autowired
     private RoleMapper roleMapper;
+
+    @Autowired
+    private RoleMenuMapper roleMenuMapper;
 
     @Autowired
     private RoleConvert roleConvert;
@@ -98,7 +100,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
      * @return java.lang.Object 角色信息返回实例
      */
     @Override
-    public Object queryAll(RoleQueryDTO criteria, Page page) {
+    public PageDTO queryAll(RoleQueryDTO criteria, Page page) {
         IPage<Role> roles = roleMapper.selectCollPage(page, WrapperHelp.getWrapper(criteria));
         return PageUtil.toPage(roles, roleConvert::toDto);
     }
@@ -175,13 +177,13 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     /**
      * 删除角色菜单
-     *
-     * @param id 角色id
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void untiedMenu(Long id) {
-        roleMapper.untiedRoleMenuByMenuId(id);
+    public void untiedMenu(Collection<Long> ids) {
+        LambdaQueryWrapper<RoleMenu> queryWrapper= new LambdaQueryWrapper<>();
+        queryWrapper.in(RoleMenu::getMenuId,ids);
+        roleMenuMapper.delete(queryWrapper);
     }
 
     /**
@@ -245,20 +247,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Override
     public List<RoleSmallDTO> getRoleByUserId(Long userId) {
         List<Role> list = roleMapper.findRolesByUserId(userId);
-        return roleSmallConvert.toDto(list);
-    }
-
-
-    /**
-     * 获取角色列表
-     *
-     * @param userId 用户ID
-     * @param teamId 团队ID
-     * @return java.util.List<org.dubhe.domain.dto.RoleSmallDTO> 角色列表
-     */
-    @Override
-    public List<RoleSmallDTO> getRoleByUserIdAndTeamId(Long userId, Long teamId) {
-        List<Role> list = roleMapper.findByUserIdAndTeamId(userId, teamId);
         return roleSmallConvert.toDto(list);
     }
 

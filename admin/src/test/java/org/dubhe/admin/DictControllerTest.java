@@ -1,30 +1,22 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
+
 
 package org.dubhe.admin;
 
-import org.dubhe.biz.base.constant.AuthConst;
+import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.dubhe.biz.base.dto.DeleteDTO;
+import org.dubhe.admin.domain.dto.DictCreateDTO;
+import org.dubhe.admin.domain.dto.DictUpdateDTO;
+import org.dubhe.admin.domain.entity.DictDetail;
 import org.dubhe.cloud.unittest.base.BaseTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 /**
  * @description 实体类
@@ -35,9 +27,62 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 public class DictControllerTest extends BaseTest {
 
     @Test
-    public void whenQueryUserAll() throws Exception {
-        String accessToken = obtainAccessToken();
-        mockMvcWithNoRequestBody(mockMvc.perform(MockMvcRequestBuilders.get("/api/dict/all").header(AuthConst.AUTHORIZATION, AuthConst.ACCESS_TOKEN_PREFIX + accessToken))
-                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn().getResponse(), 200);
+    public void list() throws Exception {
+        MockHttpServletRequestBuilder mockHttpServletRequestBuilder = MockMvcRequestBuilders.get("/dict/all");
+        mockHttp(mockHttpServletRequestBuilder);
     }
+
+    @Test
+    public void page() throws Exception {
+        MockHttpServletRequestBuilder mockHttpServletRequestBuilder = MockMvcRequestBuilders.get("/dict");
+        mockHttp(mockHttpServletRequestBuilder);
+    }
+
+    @Test
+    public void create() throws Exception {
+        DictCreateDTO createDTO = new DictCreateDTO();
+        createDTO.setName("aaa");
+        createDTO.setRemark("aaa");
+        DictDetail detail = new DictDetail();
+        detail.setDictId(1L);
+        detail.setLabel("bbbb");
+        detail.setSort("1");
+        detail.setValue("cccc");
+        createDTO.setDictDetails(Lists.newArrayList(detail));
+        MockHttpServletRequestBuilder mockHttpServletRequestBuilder = MockMvcRequestBuilders.post("/dict")
+                .content(JSON.toJSONString(createDTO)).contentType(MediaType.APPLICATION_JSON);
+                ;
+        mockHttp(mockHttpServletRequestBuilder);
+    }
+
+    @Test
+    public void update() throws Exception {
+        DictUpdateDTO dto = new DictUpdateDTO();
+        dto.setId(41L);
+        dto.setName("eee");
+        dto.setRemark("eee");
+        DictDetail detail = new DictDetail();
+        detail.setDictId(1L);
+        detail.setLabel("fff");
+        detail.setSort("1");
+        detail.setValue("ggg");
+        dto.setDictDetails(Lists.newArrayList(detail));
+        MockHttpServletRequestBuilder mockHttpServletRequestBuilder = MockMvcRequestBuilders.put("/dict")
+                .content(JSON.toJSONString(dto)).contentType(MediaType.APPLICATION_JSON);
+        ;
+        mockHttp(mockHttpServletRequestBuilder);
+    }
+
+
+    @Test
+    public void delete() throws Exception {
+        DeleteDTO dto = new DeleteDTO();
+        dto.setIds(Sets.newHashSet(41L));
+        MockHttpServletRequestBuilder mockHttpServletRequestBuilder = MockMvcRequestBuilders.delete("/dict")
+                .content(JSON.toJSONString(dto)).contentType(MediaType.APPLICATION_JSON);
+        ;
+        mockHttp(mockHttpServletRequestBuilder);
+    }
+
+
 }

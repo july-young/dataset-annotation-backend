@@ -1,22 +1,8 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
+
 
 package org.dubhe.data.service;
 
+import org.dubhe.biz.db.utils.PageDTO;
 import org.dubhe.data.domain.dto.ConversionCreateDTO;
 import org.dubhe.data.domain.dto.DatasetVersionCreateDTO;
 import org.dubhe.data.domain.dto.DatasetVersionDeleteDTO;
@@ -44,16 +30,11 @@ public interface DatasetVersionService {
 
     /**
      * 数据集版本列表
-     *
-     * @param datasetVersionQueryCriteria 查询条件
-     * @return Map<String, Object> 版本列表
      */
-    Map<String, Object> getList(DatasetVersionQueryCriteriaDTO datasetVersionQueryCriteria);
+    PageDTO<DatasetVersionVO> page(DatasetVersionQueryCriteriaDTO datasetVersionQueryCriteria);
 
     /**
      * 数据集版本删除
-     *
-     * @param datasetVersionDeleteDTO 数据集版本删除条件
      */
     void versionDelete(DatasetVersionDeleteDTO datasetVersionDeleteDTO);
 
@@ -196,7 +177,7 @@ public interface DatasetVersionService {
      *
      * @param datasetVersion  版本详情
      */
-    void insertOne(DatasetVersion datasetVersion);
+    void insert(DatasetVersion datasetVersion);
 
     /**
      * 更新版本

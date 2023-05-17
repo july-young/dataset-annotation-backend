@@ -1,12 +1,12 @@
 /**
  * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,17 +36,13 @@ import org.dubhe.admin.domain.entity.UserAvatar;
 import org.dubhe.admin.domain.entity.UserConfig;
 import org.dubhe.admin.domain.entity.UserRole;
 import org.dubhe.admin.domain.vo.EmailVo;
-import org.dubhe.admin.domain.vo.UserConfigVO;
-import org.dubhe.admin.domain.vo.UserVO;
 import org.dubhe.admin.enums.UserMailCodeEnum;
 import org.dubhe.admin.event.EmailEventPublisher;
 import org.dubhe.admin.service.UserService;
-import org.dubhe.admin.service.convert.TeamConvert;
 import org.dubhe.admin.service.convert.UserConvert;
 import org.dubhe.biz.base.constant.AuthConst;
 import org.dubhe.biz.base.constant.ResponseCode;
 import org.dubhe.biz.base.constant.UserConstant;
-import org.dubhe.biz.base.context.EncryptVisUser;
 import org.dubhe.biz.base.context.UserContext;
 import org.dubhe.biz.base.dto.*;
 import org.dubhe.biz.base.enums.BaseErrorCodeEnum;
@@ -54,18 +50,18 @@ import org.dubhe.biz.base.enums.SwitchEnum;
 import org.dubhe.biz.base.exception.BusinessException;
 import org.dubhe.biz.base.exception.CaptchaException;
 import org.dubhe.biz.base.utils.DateUtil;
-import org.dubhe.biz.base.utils.Md5Util;
-import org.dubhe.biz.base.utils.RSAUtil;
 import org.dubhe.biz.base.utils.RandomUtil;
 import org.dubhe.biz.base.utils.RsaEncrypt;
 import org.dubhe.biz.base.vo.DataResponseBody;
 import org.dubhe.biz.dataresponse.factory.DataResponseFactory;
+import org.dubhe.biz.db.utils.PageDTO;
 import org.dubhe.biz.db.utils.PageUtil;
 import org.dubhe.biz.db.utils.WrapperHelp;
 import org.dubhe.biz.file.utils.DubheFileUtil;
 import org.dubhe.biz.log.enums.LogEnum;
 import org.dubhe.biz.log.utils.LogUtil;
 import org.dubhe.biz.permission.annotation.DataPermissionMethod;
+import org.dubhe.biz.permission.base.BaseService;
 import org.dubhe.biz.redis.utils.RedisUtils;
 import org.dubhe.cloud.authconfig.dto.JwtUserDTO;
 import org.dubhe.cloud.authconfig.factory.PasswordEncoderFactory;
@@ -127,13 +123,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private MenuMapper menuMapper;
 
     @Autowired
-    private TeamMapper teamMapper;
-
-    @Autowired
     private UserConvert userConvert;
-
-    @Autowired
-    private TeamConvert teamConvert;
 
     @Autowired
     private UserAvatarMapper userAvatarMapper;
@@ -154,9 +144,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Autowired
     private PermissionMapper permissionMapper;
 
-    @Autowired
-    private UserConfigMapper userConfigMapper;
-
     /**
      * 测试标识 true:允许debug false:拒绝debug
      */
@@ -167,27 +154,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * 分页查询用户列表
-     *
-     * @param criteria 查询条件
-     * @param page     分页请求实体
-     * @return java.lang.Object 用户列表返回实例
      */
     @Override
-    public Object queryAll(UserQueryDTO criteria, Page page) {
+    public PageDTO<UserDTO> queryAll(UserQueryDTO criteria, Page page) {
+        IPage<User> users;
         if (criteria.getRoleId() == null) {
-            IPage<User> users = userMapper.selectCollPage(page, WrapperHelp.getWrapper(criteria));
-            return PageUtil.toPage(users, userConvert::toDto);
+            users = userMapper.selectCollPage(page, WrapperHelp.getWrapper(criteria));
         } else {
-            IPage<User> users = userMapper.selectCollPageByRoleId(page, WrapperHelp.getWrapper(criteria), criteria.getRoleId());
-            return PageUtil.toPage(users, userConvert::toDto);
+            users = userMapper.selectCollPageByRoleId(page, WrapperHelp.getWrapper(criteria), criteria.getRoleId());
         }
+        return PageUtil.toPage(users, userConvert::toDto);
     }
 
     /**
      * 查询用户列表
-     *
-     * @param criteria 用户查询条件
-     * @return java.util.List<org.dubhe.domain.dto.UserDTO> 用户列表返回实例
      */
     @Override
     public List<UserDTO> queryAll(UserQueryDTO criteria) {
@@ -196,28 +176,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 根据用户ID查询团队列表
-     *
-     * @param userId 用户ID
-     * @return java.util.List<org.dubhe.domain.dto.TeamDTO> 团队列表信息
-     */
-    @Override
-    public List<TeamDTO> queryTeams(Long userId) {
-
-        User user = userMapper.selectOne(
-                new LambdaQueryWrapper<User>()
-                        .eq(User::getId, userId)
-                        .eq(User::getDeleted, SwitchEnum.getBooleanValue(SwitchEnum.OFF.getValue()))
-        );
-        List teamList = teamMapper.findByUserId(user.getId());
-        return teamConvert.toDto(teamList);
-    }
-
-    /**
      * 根据ID获取用户信息
-     *
-     * @param id id
-     * @return org.dubhe.domain.dto.UserDTO 用户信息返回实例
      */
     @Override
     public UserDTO findById(long id) {
@@ -228,9 +187,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * 新增用户
-     *
-     * @param resources 用户新增实体
-     * @return org.dubhe.domain.dto.UserDTO 用户信息返回实例
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -258,16 +214,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * 修改用户
-     *
-     * @param resources 用户修改请求实例
-     * @return org.dubhe.domain.dto.UserDTO 用户信息返回实例
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserDTO update(UserUpdateDTO resources) {
 
         //修改管理员信息校验
-        checkIsAdmin(resources.getId());
+        BaseService.isAdmin();
 
         User user = userMapper.selectCollById(resources.getId());
         User userTmp = userMapper.findByUsername(resources.getUsername());
@@ -297,33 +250,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * 批量删除用户信息
-     *
-     * @param ids 用户ID列表
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(Set<Long> ids) {
         if (!CollectionUtils.isEmpty(ids)) {
-            Long adminId = Long.valueOf(UserConstant.ADMIN_USER_ID);
+            Long adminId = UserConstant.ADMIN_USER_ID;
             if (ids.contains(adminId)) {
                 throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_CANNOT_DELETE);
             }
-            ids.forEach(id -> {
-                userMapper.updateById(
-                        User.builder()
-                                .id(id)
-                                .deleted(SwitchEnum.getBooleanValue(SwitchEnum.ON.getValue()))
-                                .build());
-            });
+            userMapper.deleteBatchIds(ids);
         }
     }
 
 
     /**
      * 根据用户名称获取用户信息
-     *
-     * @param userName 用户名称
-     * @return org.dubhe.domain.dto.UserDTO 用户信息返回实例
      */
     @Override
     public UserDTO findByName(String userName) {
@@ -335,34 +277,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserDTO dto = new UserDTO();
         BeanUtils.copyProperties(user, dto);
         List<Role> roles = roleMapper.findRolesByUserId(user.getId());
-        if (!CollectionUtils.isEmpty(roles)) {
-            dto.setRoles(roles.stream().map(a -> {
-                SysRoleDTO sysRoleDTO = new SysRoleDTO();
-                sysRoleDTO.setId(a.getId());
-                sysRoleDTO.setName(a.getName());
-                return sysRoleDTO;
-            }).collect(Collectors.toList()));
-        }
+
+        List<SysRoleDTO> sysRoleDTOList = roles.stream().map(a -> {
+            SysRoleDTO sysRoleDTO = new SysRoleDTO();
+            sysRoleDTO.setId(a.getId());
+            sysRoleDTO.setName(a.getName());
+            return sysRoleDTO;
+        }).collect(Collectors.toList());
+
+        dto.setRoles(sysRoleDTOList);
         return dto;
 
     }
 
-    private SysUserConfigDTO getUserConfig(Long userId) {
-        UserConfig userConfig = userConfigMapper.selectOne(new QueryWrapper<>(new UserConfig().setUserId(userId)));
-        SysUserConfigDTO sysUserConfigDTO= new SysUserConfigDTO();
-        if (userConfig == null){
-            return sysUserConfigDTO.setCpuLimit(cpuLimit).setMemoryLimit(memoryLimit)
-                        .setGpuLimit(gpuLimit).setNotebookDelayDeleteTime(defaultNotebookDelayDeleteTime);
-        }
-        BeanUtils.copyProperties(userConfig, sysUserConfigDTO);
-        return sysUserConfigDTO;
-    }
-
-
     /**
      * 修改用户个人中心信息
-     *
-     * @param resources 个人用户信息修改请求实例
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -370,20 +299,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = userMapper.selectOne(
                 new LambdaQueryWrapper<User>()
                         .eq(User::getId, resources.getId())
-                        .eq(User::getDeleted, SwitchEnum.getBooleanValue(SwitchEnum.OFF.getValue()))
         );
         user.setNickName(resources.getNickName());
         user.setRemark(resources.getRemark());
         user.setPhone(resources.getPhone());
         user.setSex(resources.getSex());
         userMapper.updateById(user);
-        if (user.getUserAvatar() != null) {
-            if (user.getUserAvatar().getId() != null) {
-                userAvatarMapper.updateById(user.getUserAvatar());
-            } else {
-                userAvatarMapper.insert(user.getUserAvatar());
-            }
-        }
     }
 
 
@@ -411,16 +332,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void updateAvatar(String realName, String path) {
         User user = userMapper.findByUsername(JwtUtils.getCurUser().getUsername());
         UserAvatar userAvatar = user.getUserAvatar();
-        UserAvatar newAvatar = new UserAvatar(userAvatar, realName, path, null);
-
-        if (newAvatar.getId() != null) {
-            userAvatarMapper.updateById(newAvatar);
+        if (userAvatar == null) {
+            userAvatar = new UserAvatar();
+            userAvatar.setRealName(realName);
+            userAvatar.setPath(path);
+            userAvatarMapper.insert(userAvatar);
+            user.setAvatarId(userAvatar.getId());
+            userMapper.updateById(user);
         } else {
-            userAvatarMapper.insert(newAvatar);
+            userAvatar.setRealName(realName);
+            userAvatar.setPath(path);
+            userMapper.updateById(user);
         }
-        user.setAvatarId(newAvatar.getId());
-        user.setUserAvatar(newAvatar);
-        userMapper.updateById(user);
     }
 
     /**
@@ -438,14 +361,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * 用户信息导出
-     *
-     * @param queryAll 用户信息列表
-     * @param response 导出http响应
      */
     @Override
-    public void download(List<UserDTO> queryAll, HttpServletResponse response) throws IOException {
+    public void download(List<UserDTO> userDTOList, HttpServletResponse response) throws IOException {
         List<Map<String, Object>> list = new ArrayList<>();
-        for (UserDTO userDTO : queryAll) {
+        for (UserDTO userDTO : userDTOList) {
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("用户名", userDTO.getUsername());
             map.put("邮箱", userDTO.getEmail());
@@ -461,9 +381,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * 查询用户ID权限
-     *
-     * @param id 用户ID
-     * @return java.util.Set<java.lang.String> 权限列表
      */
     @Override
     public Set<String> queryPermissionByUserId(Long id) {
@@ -472,13 +389,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * 用户注册信息
-     *
-     * @param userRegisterDTO 用户注册请求实体
-     * @return org.dubhe.base.DataResponseBody 注册返回结果集
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public DataResponseBody userRegister(UserRegisterDTO userRegisterDTO) {
+    public void userRegister(UserRegisterDTO userRegisterDTO) {
         PasswordEncoder passwordEncoder = PasswordEncoderFactory.getPasswordEncoder();
         //用户信息校验
         checkoutUserInfo(userRegisterDTO);
@@ -490,46 +404,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     .nickName(userRegisterDTO.getNickName())
                     .password(encode)
                     .phone(userRegisterDTO.getPhone())
-                    .sex(SwitchEnum.ON.getValue().compareTo(userRegisterDTO.getSex()) == 0 ? UserConstant.SEX_MEN : UserConstant.SEX_WOMEN)
+                    .sex(userRegisterDTO.getSex() == 1 ? UserConstant.SEX_MEN : UserConstant.SEX_WOMEN)
                     .username(userRegisterDTO.getUsername()).build();
 
             //新增用户注册信息
             userMapper.insert(newUser);
-
+            UserRole userRole = UserRole.builder().roleId((long) UserConstant.REGISTER_ROLE_ID).userId(newUser.getId()).build();
             //绑定用户默认权限
-            userRoleMapper.insert(UserRole.builder().roleId((long) UserConstant.REGISTER_ROLE_ID).userId(newUser.getId()).build());
+            userRoleMapper.insert(userRole);
 
         } catch (Exception e) {
-            LogUtil.error(LogEnum.SYS_ERR, "UserServiceImpl userRegister error , param:{} error:{}", JSONObject.toJSONString(userRegisterDTO), e);
-            throw new BusinessException(BaseErrorCodeEnum.ERROR_SYSTEM.getCode(), BaseErrorCodeEnum.ERROR_SYSTEM.getMsg());
+            LogUtil.error(LogEnum.SYS_ERR, "userServiceImpl userRegister error , param:{} error:{}", userRegisterDTO, e);
+            throw new BusinessException(BaseErrorCodeEnum.ERROR_SYSTEM);
         }
 
-        return new DataResponseBody();
     }
 
 
     /**
      * 获取code通过发送邮件
-     *
-     * @param userRegisterMailDTO 用户发送邮件请求实体
-     * @return org.dubhe.base.DataResponseBody 发送邮件返回结果集
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public DataResponseBody getCodeBySentEmail(UserRegisterMailDTO userRegisterMailDTO) {
+    public void getCodeBySentEmail(UserRegisterMailDTO userRegisterMailDTO) {
         String email = userRegisterMailDTO.getEmail();
 
         User dbUser = userMapper.selectOne(new LambdaQueryWrapper<User>()
                 .eq(User::getEmail, email)
-                .eq(User::getDeleted, SwitchEnum.getBooleanValue(SwitchEnum.OFF.getValue()))
         );
         //校验用户是否注册（type : 1 用户注册 2 修改邮箱 ）
-        Boolean isRegisterOrUpdate = UserMailCodeEnum.REGISTER_CODE.getValue().compareTo(userRegisterMailDTO.getType()) == 0 ||
-                UserMailCodeEnum.MAIL_UPDATE_CODE.getValue().compareTo(userRegisterMailDTO.getType()) == 0;
+        Boolean isRegisterOrUpdate = UserMailCodeEnum.REGISTER_CODE.getValue().equals(userRegisterMailDTO.getType()) ||
+                UserMailCodeEnum.MAIL_UPDATE_CODE.getValue().equals(userRegisterMailDTO.getType());
         if (!Objects.isNull(dbUser) && isRegisterOrUpdate) {
-            LogUtil.error(LogEnum.SYS_ERR, "UserServiceImpl dbUser already register , dbUser:{} ", JSONObject.toJSONString(dbUser));
-            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_EMAIL_ALREADY_EXISTS.getCode(),
-                    BaseErrorCodeEnum.SYSTEM_USER_EMAIL_ALREADY_EXISTS.getMsg());
+            LogUtil.error(LogEnum.SYS_ERR, "UserServiceImpl dbUser already register , dbUser:{} ", dbUser);
+            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_EMAIL_ALREADY_EXISTS);
         }
 
 
@@ -558,163 +466,106 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         } catch (Exception e) {
             redisUtils.hdel(UserConstant.USER_EMAIL_REGISTER.concat(email), email);
             LogUtil.error(LogEnum.SYS_ERR, "UserServiceImpl getCodeBySentEmail error , param:{} error:{}", email, e);
-            throw new BusinessException(BaseErrorCodeEnum.ERROR_SYSTEM.getCode(), BaseErrorCodeEnum.ERROR_SYSTEM.getMsg());
+            throw new BusinessException(BaseErrorCodeEnum.ERROR_SYSTEM);
         }
-        return new DataResponseBody();
     }
 
 
     /**
      * 邮箱修改
-     *
-     * @param userEmailUpdateDTO 修改邮箱请求实体
-     * @return org.dubhe.base.DataResponseBody 修改邮箱返回结果集
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public DataResponseBody resetEmail(UserEmailUpdateDTO userEmailUpdateDTO) {
+    public void resetEmail(UserEmailUpdateDTO userEmailUpdateDTO) {
         //校验邮箱信息
         User dbUser = checkoutEmailInfoByReset(userEmailUpdateDTO);
 
         try {
+            User user = User.builder()
+                    .id(dbUser.getId())
+                    .email(userEmailUpdateDTO.getEmail()).build();
             //修改邮箱信息
-            userMapper.updateById(
-                    User.builder()
-                            .id(dbUser.getId())
-                            .email(userEmailUpdateDTO.getEmail()).build());
+            userMapper.updateById(user);
         } catch (Exception e) {
             LogUtil.error(LogEnum.SYS_ERR, "UserServiceImpl update email error , email:{} error:{}", userEmailUpdateDTO.getEmail(), e);
             throw new BusinessException(BaseErrorCodeEnum.ERROR_SYSTEM.getCode(),
                     BaseErrorCodeEnum.ERROR_SYSTEM.getMsg());
         }
-
-        return new DataResponseBody();
-    }
-
-
-    /**
-     * 获取用户信息
-     *
-     * @return java.util.Map<java.lang.String, java.lang.Object> 用户信息结果集
-     */
-    @Override
-    public Map<String, Object> userinfo() {
-        JwtUserDTO curUser = JwtUtils.getCurUser();
-        if (Objects.isNull(curUser)) {
-            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_IS_NOT_EXISTS.getCode()
-                    , BaseErrorCodeEnum.SYSTEM_USER_IS_NOT_EXISTS.getMsg());
-        }
-
-        //查询用户是否是管理员
-        List<UserRole> userRoles = userRoleMapper.selectList(
-                new LambdaQueryWrapper<UserRole>()
-                        .eq(UserRole::getUserId, curUser.getCurUserId())
-                        .eq(UserRole::getRoleId, Long.parseLong(String.valueOf(UserConstant.ADMIN_ROLE_ID)))
-        );
-        UserVO vo = UserVO.builder()
-                .email(curUser.getUser().getEmail())
-                .password(Md5Util.createMd5(Md5Util.createMd5(curUser.getUsername()).concat(initialPassword)))
-                .username(curUser.getUsername())
-                .is_staff(!CollectionUtils.isEmpty(userRoles) ? true : false).build();
-
-        return BeanMap.create(vo);
     }
 
 
     /**
      * 密码重置接口
-     *
-     * @param userResetPasswordDTO 密码修改请求参数
-     * @return org.dubhe.base.DataResponseBody 密码修改结果集
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public DataResponseBody resetPassword(UserResetPasswordDTO userResetPasswordDTO) {
+    public void resetPassword(UserResetPasswordDTO userResetPasswordDTO) {
         PasswordEncoder passwordEncoder = PasswordEncoderFactory.getPasswordEncoder();
         //校验 邮箱地址 和 验证码
         checkoutEmailAndCode(userResetPasswordDTO.getCode(), userResetPasswordDTO.getEmail(), UserConstant.USER_EMAIL_RESET_PASSWORD);
-
-        User dbUser = userMapper.selectOne(new LambdaQueryWrapper<User>()
-                .eq(User::getEmail, userResetPasswordDTO.getEmail())
-                .eq(User::getDeleted, SwitchEnum.getBooleanValue(SwitchEnum.OFF.getValue()))
-        );
-        if (Objects.isNull(dbUser)) {
-            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_EMAIL_NOT_EXISTS.getCode()
-                    , BaseErrorCodeEnum.SYSTEM_USER_EMAIL_NOT_EXISTS.getMsg());
+        LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<User>();
+        userLambdaQueryWrapper.eq(User::getEmail, userResetPasswordDTO.getEmail());
+        User dbUser = userMapper.selectOne(userLambdaQueryWrapper);
+        if (dbUser == null) {
+            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_EMAIL_NOT_EXISTS);
         }
 
         //加密密码
         String encode = passwordEncoder.encode(RsaEncrypt.decrypt(userResetPasswordDTO.getPassword(), privateKey));
         try {
-            userMapper.updateById(User.builder().id(dbUser.getId()).password(encode).build());
+            User user = User.builder().id(dbUser.getId()).password(encode).build();
+            userMapper.updateById(user);
         } catch (Exception e) {
-            throw new BusinessException(BaseErrorCodeEnum.ERROR_SYSTEM.getCode()
-                    , BaseErrorCodeEnum.ERROR_SYSTEM.getMsg());
+            throw new BusinessException(BaseErrorCodeEnum.ERROR_SYSTEM);
         }
-        return new DataResponseBody();
     }
 
 
     /**
      * 登录
      *
-     * @param authUserDTO 登录请求实体
+     * @param authUserLoginDTO 登录请求实体
      */
     @Override
     @DataPermissionMethod
-    public DataResponseBody<Map<String, Object>> login(AuthUserDTO authUserDTO) {
+    public AuthUserLoginResultDTO login(AuthUserLoginDTO authUserLoginDTO) {
         if (!debugFlag) {
-            validateCode(authUserDTO.getCode(), authUserDTO.getUuid());
+            validateCode(authUserLoginDTO.getCode(), authUserLoginDTO.getUuid());
         }
         String password = null;
         try {
             RSA rsa = new RSA(privateKey, null);
-            password = new String(rsa.decrypt(authUserDTO.getPassword(), KeyType.PrivateKey));
+            password = new String(rsa.decrypt(authUserLoginDTO.getPassword(), KeyType.PrivateKey));
         } catch (Exception e) {
-            LogUtil.error(LogEnum.BIZ_SYS, "rsa 密钥解析失败, originPassword:{} , 密钥:{}，异常：{}", authUserDTO.getPassword(), KeyType.PrivateKey, e);
+            LogUtil.error(LogEnum.BIZ_SYS, "rsa 密钥解析失败, originPassword:{} , 密钥:{}，异常：{}", authUserLoginDTO.getPassword(), KeyType.PrivateKey, e);
             throw new BusinessException("请输入正确密码");
         }
 
         Map<String, String> params = new HashMap<>();
         params.put("grant_type", "password");
-        params.put("username", authUserDTO.getUsername());
+        params.put("username", authUserLoginDTO.getUsername());
         params.put("client_id", AuthConst.CLIENT_ID);
         params.put("client_secret", AuthConst.CLIENT_SECRET);
         params.put("password", password);
         params.put("scope", "all");
         DataResponseBody<Oauth2TokenDTO> restResult = authServiceClient.postAccessToken(params);
-        Map<String, Object> authInfo = new HashMap<>(3);
-        if (ResponseCode.SUCCESS.compareTo(restResult.getCode()) == 0 && !Objects.isNull(restResult.getData())) {
+        AuthUserLoginResultDTO dto = new AuthUserLoginResultDTO();
+        if (ResponseCode.SUCCESS.equals(restResult.getCode()) && restResult.getData() != null) {
             Oauth2TokenDTO userDto = restResult.getData();
-            UserDTO user = findByName(authUserDTO.getUsername());
+            UserDTO user = findByName(authUserLoginDTO.getUsername());
             Set<String> permissions = this.queryPermissionByUserId(user.getId());
             if (CollUtil.isEmpty(permissions)) {
                 throw new BusinessException(BaseErrorCodeEnum.SYSTEM_ROLE_NOT_EXISTS);
             }
-            // 返回 token 与 用户信息
-            authInfo.put("token", userDto.getTokenHead() + userDto.getToken());
-            authInfo.put("user", user);
-            authInfo.put("permissions", permissions);
+            dto.setToken(userDto.getTokenHead() + userDto.getToken());
+            dto.setUser(user);
+            dto.setPermissions(permissions);
         }
-        return DataResponseFactory.success(authInfo);
-    }
-
-
-    /**
-     * 退出登录
-     *
-     * @param accessToken token
-     */
-    @Override
-    public DataResponseBody logout(String accessToken) {
-        return authServiceClient.logout(accessToken);
+        return dto;
     }
 
     /**
      * 根据用户昵称获取用户信息
-     *
-     * @param nickName 用户昵称
-     * @return org.dubhe.domain.dto.UserDTO 用户信息DTO
      */
     @Override
     public List<UserDTO> findByNickName(String nickName) {
@@ -736,51 +587,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return userConvert.toDto(users);
     }
 
-    /**
-     * 根据用户 ID 查询用户配置
-     *
-     * @param userId 用户 ID
-     * @return org.dubhe.admin.domain.vo.UserConfigVO 用户配置 VO
-     */
-    @Override
-    public UserConfigVO findUserConfig(Long userId) {
-        // 查询用户配置
-        UserConfig userConfig = userConfigMapper.selectOne(new QueryWrapper<>(new UserConfig().setUserId(userId)));
-        UserConfigVO userConfigVO = new UserConfigVO();
-        // 如果用户配置为空，则返回
-        if (userConfig == null){
-            return userConfigVO.setUserId(userId).setCpuLimit(cpuLimit).setMemoryLimit(memoryLimit)
-                    .setGpuLimit(gpuLimit).setNotebookDelayDeleteTime(defaultNotebookDelayDeleteTime);
-        }
-       // 封装用户配置 VO
-        BeanUtils.copyProperties(userConfig, userConfigVO);
-        return userConfigVO;
-    }
-
-
-
-    @Override
-    public String encryptUserForVis(Authentication authentication) {
-        String encodeStr = "";
-        try {
-            JwtUserDTO jwtUser = (JwtUserDTO) authentication.getPrincipal();
-            EncryptVisUser visUser = new EncryptVisUser();
-            BeanUtils.copyProperties(jwtUser.getUser(), visUser);
-            encodeStr = RSAUtil.publicEncrypt(JSONObject.toJSONString(visUser), RSAUtil.getPublicKey(visPublicKey));
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
-        return encodeStr;
-    }
-
 
     /**
      * 校验验证码
      *
-     * @param loginCaptcha  验证码参数
-     * @param uuid          验证码redis-key
+     * @param loginCaptcha 验证码参数
+     * @param uuid         验证码redis-key
      */
     private void validateCode(String loginCaptcha, String uuid) {
         // 验证码未输入
@@ -804,31 +616,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         PasswordEncoder passwordEncoder = PasswordEncoderFactory.getPasswordEncoder();
         String email = userEmailUpdateDTO.getEmail();
         //管理员信息校验
-        checkIsAdmin(userEmailUpdateDTO.getUserId());
+        BaseService.isAdmin();
 
         //校验用户信息是否存在
         User dbUser = userMapper.selectCollById(userEmailUpdateDTO.getUserId());
         if (ObjectUtil.isNull(dbUser)) {
             LogUtil.error(LogEnum.SYS_ERR, "UserServiceImpl dbUser is null , userId:{}", userEmailUpdateDTO.getUserId());
-            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_IS_NOT_EXISTS.getCode(),
-                    BaseErrorCodeEnum.SYSTEM_USER_IS_NOT_EXISTS.getMsg());
+            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_IS_NOT_EXISTS);
         }
         //校验密码是否正确
         String decryptPassword = RsaEncrypt.decrypt(userEmailUpdateDTO.getPassword(), privateKey);
         if (!passwordEncoder.matches(decryptPassword, dbUser.getPassword())) {
             LogUtil.error(LogEnum.SYS_ERR, "UserServiceImpl password error , webPassword:{}, dbPassword:{} ",
                     userEmailUpdateDTO.getPassword(), dbUser.getPassword());
-            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_EMAIL_PASSWORD_ERROR.getCode(),
-                    BaseErrorCodeEnum.SYSTEM_USER_EMAIL_PASSWORD_ERROR.getMsg());
+            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_EMAIL_PASSWORD_ERROR);
         }
 
         //邮箱唯一性校验
-        User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
+        Integer count = userMapper.selectCount(new LambdaQueryWrapper<User>()
                 .eq(User::getEmail, userEmailUpdateDTO.getEmail()));
-        if (!ObjectUtil.isNull(user)) {
+        if (count > 0) {
             LogUtil.error(LogEnum.SYS_ERR, "UserServiceImpl Email already exists , email:{} ", userEmailUpdateDTO.getEmail());
-            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_EMAIL_ALREADY_EXISTS.getCode(),
-                    BaseErrorCodeEnum.SYSTEM_USER_EMAIL_ALREADY_EXISTS.getMsg());
+            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_EMAIL_ALREADY_EXISTS);
         }
 
         //校验 邮箱地址 和 验证码
@@ -846,9 +655,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private void limitSendEmail(final String receiverMailAddress) {
         double count = redisUtils.hincr(UserConstant.USER_EMAIL_LIMIT_COUNT.concat(receiverMailAddress), receiverMailAddress, 1);
         if (count > UserConstant.COUNT_SENT_EMAIL) {
-            LogUtil.error(LogEnum.SYS_ERR, "Email verification code cannot exceed three times , error:{}", UserConstant.COUNT_SENT_EMAIL);
-            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_EMAIL_CODE_CANNOT_EXCEED_TIMES.getCode(),
-                    BaseErrorCodeEnum.SYSTEM_USER_EMAIL_CODE_CANNOT_EXCEED_TIMES.getMsg());
+            LogUtil.error(LogEnum.SYS_ERR, "Email verification code cannot exceed {} times .", UserConstant.COUNT_SENT_EMAIL);
+            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_EMAIL_CODE_CANNOT_EXCEED_TIMES);
         } else {
             // 验证码次数凌晨清除
             String concat = UserConstant.USER_EMAIL_LIMIT_COUNT.concat(receiverMailAddress);
@@ -862,8 +670,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * 用户信息校验
-     *
-     * @param userRegisterDTO 用户信息校验实体
      */
     private void checkoutUserInfo(UserRegisterDTO userRegisterDTO) {
         //账户唯一性校验
@@ -871,8 +677,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .eq(User::getUsername, userRegisterDTO.getUsername()));
         if (!ObjectUtil.isNull(user)) {
             LogUtil.error(LogEnum.SYS_ERR, "UserServiceImpl username already exists , username:{} ", userRegisterDTO.getUsername());
-            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USERNAME_ALREADY_EXISTS.getCode(),
-                    BaseErrorCodeEnum.SYSTEM_USERNAME_ALREADY_EXISTS.getMsg());
+            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USERNAME_ALREADY_EXISTS);
         }
         //校验 邮箱地址 和 验证码
         checkoutEmailAndCode(userRegisterDTO.getCode(), userRegisterDTO.getEmail(), UserConstant.USER_EMAIL_REGISTER);
@@ -881,8 +686,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * 校验 邮箱地址 和 验证码
      *
-     * @param code 验证码
-     * @param email 邮箱
+     * @param code         验证码
+     * @param email        邮箱
      * @param codeRedisKey redis-key
      */
     private void checkoutEmailAndCode(String code, String email, String codeRedisKey) {
@@ -890,16 +695,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Object emailVoObj = redisUtils.hget(codeRedisKey.concat(email), email);
         if (Objects.isNull(emailVoObj)) {
             LogUtil.error(LogEnum.SYS_ERR, "UserServiceImpl emailVo already expired , email:{} ", email);
-            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_REGISTER_EMAIL_INFO_EXPIRED.getCode(),
-                    BaseErrorCodeEnum.SYSTEM_USER_REGISTER_EMAIL_INFO_EXPIRED.getMsg());
+            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_REGISTER_EMAIL_INFO_EXPIRED);
         }
 
         //校验邮箱和验证码
         EmailVo emailVo = (EmailVo) emailVoObj;
         if (!email.equals(emailVo.getEmail()) || !code.equals(emailVo.getCode())) {
             LogUtil.error(LogEnum.SYS_ERR, "UserServiceImpl email or code error , email:{} code:{}", email, code);
-            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_EMAIL_OR_CODE_ERROR.getCode(),
-                    BaseErrorCodeEnum.SYSTEM_USER_EMAIL_OR_CODE_ERROR.getMsg());
+            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_EMAIL_OR_CODE_ERROR);
         }
     }
 
@@ -910,31 +713,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param type 发送邮件类型
      */
     private String getSendEmailCodeRedisKeyByType(Integer type) {
-        String typeKey = null;
-        if (UserMailCodeEnum.REGISTER_CODE.getValue().compareTo(type) == 0) {
+        String typeKey;
+        if (UserMailCodeEnum.REGISTER_CODE.getValue().equals(type)) {
             typeKey = UserConstant.USER_EMAIL_REGISTER;
-        } else if (UserMailCodeEnum.MAIL_UPDATE_CODE.getValue().compareTo(type) == 0) {
+        } else if (UserMailCodeEnum.MAIL_UPDATE_CODE.getValue().equals(type)) {
             typeKey = UserConstant.USER_EMAIL_UPDATE;
-        } else if (UserMailCodeEnum.FORGET_PASSWORD.getValue().compareTo(type) == 0) {
+        } else if (UserMailCodeEnum.FORGET_PASSWORD.getValue().equals(type)) {
             typeKey = UserConstant.USER_EMAIL_RESET_PASSWORD;
         } else {
             typeKey = UserConstant.USER_EMAIL_OTHER;
         }
         return typeKey;
-    }
-
-
-    /**
-     * 修改管理员信息校验
-     *
-     * @param userId 用户ID
-     */
-    private void checkIsAdmin(Long userId) {
-        //修改管理员信息校验
-        if (UserConstant.ADMIN_USER_ID == userId.intValue() &&
-                UserConstant.ADMIN_USER_ID != JwtUtils.getCurUserId().intValue()) {
-            throw new BusinessException(BaseErrorCodeEnum.SYSTEM_USER_CANNOT_UPDATE_ADMIN);
-        }
     }
 
 
@@ -945,7 +734,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return 用户信息
      */
     @Override
-    public DataResponseBody<UserContext> findUserByUsername(String username) {
+    public UserContext findUserByUsername(String username) {
         User user = userMapper.findByUsername(username);
         if (Objects.isNull(user)) {
             LogUtil.error(LogEnum.SYS_ERR, "UserServiceImpl findUserByUsername user is null {}");
@@ -980,6 +769,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }).collect(Collectors.toList());
             dto.setRoles(roleDTOS);
         }
-        return DataResponseFactory.success(dto);
+        return dto;
     }
 }

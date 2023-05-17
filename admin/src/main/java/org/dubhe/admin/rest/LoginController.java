@@ -1,18 +1,3 @@
-/**
- * Copyright 2019-2020 Zheng Jie
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.dubhe.admin.rest;
 
 import cn.hutool.core.util.IdUtil;
@@ -21,10 +6,8 @@ import com.wf.captcha.base.Captcha;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.dubhe.admin.domain.dto.AuthUserDTO;
-import org.dubhe.admin.domain.dto.UserRegisterDTO;
-import org.dubhe.admin.domain.dto.UserRegisterMailDTO;
-import org.dubhe.admin.domain.dto.UserResetPasswordDTO;
+import org.dubhe.admin.client.AuthServiceClient;
+import org.dubhe.admin.domain.dto.*;
 import org.dubhe.admin.service.UserService;
 import org.dubhe.biz.base.constant.UserConstant;
 import org.dubhe.biz.base.utils.DateUtil;
@@ -78,11 +61,15 @@ public class LoginController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private AuthServiceClient authServiceClient;
+
 
     @ApiOperation("登录")
     @PostMapping(value = "/login")
-    public DataResponseBody<Map<String, Object>> login(@Validated @RequestBody AuthUserDTO authUserDTO) {
-       return userService.login(authUserDTO);
+    public DataResponseBody<AuthUserLoginResultDTO> login(@Validated @RequestBody AuthUserLoginDTO authUserLoginDTO) {
+        AuthUserLoginResultDTO authUserLoginResultDTO = userService.login(authUserLoginDTO);
+        return new DataResponseBody(authUserLoginResultDTO);
     }
 
     @ApiOperation("获取验证码")
@@ -105,15 +92,16 @@ public class LoginController {
     @ApiOperation("退出登录")
     @DeleteMapping(value = "/logout")
     public DataResponseBody logout(@RequestHeader("Authorization") String accessToken) {
-        return userService.logout(accessToken);
+        return authServiceClient.logout(accessToken);
     }
 
     @ApiOperation("获取用户信息")
     @GetMapping(value = "/info")
-    public DataResponseBody info() {
+    public DataResponseBody<Map<String, Object>> info() {
         JwtUserDTO curUser = JwtUtils.getCurUser();
+
         Set<String> permissions = userService.queryPermissionByUserId(curUser.getCurUserId());
-        Map<String, Object> authInfo = new HashMap<String, Object>(2) {{
+        Map<String, Object> authInfo = new HashMap<String, Object>(4) {{
             put("user", curUser.getUser());
             put("permissions", permissions);
         }};
@@ -124,21 +112,24 @@ public class LoginController {
     @ApiOperation("用户注册信息")
     @PostMapping(value = "/userRegister")
     public DataResponseBody userRegister(@Valid @RequestBody UserRegisterDTO userRegisterDTO) {
-        return userService.userRegister(userRegisterDTO);
+        userService.userRegister(userRegisterDTO);
+        return new DataResponseBody();
     }
 
 
     @ApiOperation("用户忘记密码")
     @PostMapping(value = "/resetPassword")
     public DataResponseBody resetPassword(@Valid @RequestBody UserResetPasswordDTO userResetPasswordDTO) {
-        return userService.resetPassword(userResetPasswordDTO);
+        userService.resetPassword(userResetPasswordDTO);
+        return new DataResponseBody();
     }
 
 
     @ApiOperation("获取code通过发送邮件")
     @PostMapping(value = "/getCodeBySentEmail")
     public DataResponseBody getCodeBySentEmail(@Valid @RequestBody UserRegisterMailDTO userRegisterMailDTO) {
-        return userService.getCodeBySentEmail(userRegisterMailDTO);
+        userService.getCodeBySentEmail(userRegisterMailDTO);
+        return new DataResponseBody();
     }
 
 
@@ -146,12 +137,6 @@ public class LoginController {
     @GetMapping(value = "/getPublicKey")
     public DataResponseBody getPublicKey() {
         return new DataResponseBody(publicKey);
-    }
-
-    @ApiOperation(value = "获取用户信息 供第三方平台使用", notes = "获取用户信息 供第三方平台使用")
-    @GetMapping("/userinfo")
-    public Map<String, Object> userinfo() {
-        return userService.userinfo();
     }
 
     /**

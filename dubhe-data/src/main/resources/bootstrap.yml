@@ -36,7 +36,6 @@ spring:
         namespace: dataset-annotation
         group: dubhe
         server-addr: localhost:8848
-#        ip: 10.252.1.7
   # 配置允许后面的Bean覆盖前面名称重复的Bean
   main:
     allow-bean-definition-overriding: true

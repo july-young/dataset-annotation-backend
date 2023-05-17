@@ -1,12 +1,12 @@
 /**
  * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,6 +42,7 @@ import org.dubhe.biz.base.exception.BusinessException;
 import org.dubhe.biz.base.service.UserContextService;
 import org.dubhe.biz.base.utils.ReflectionUtils;
 import org.dubhe.biz.base.utils.StringUtils;
+import org.dubhe.biz.db.utils.PageDTO;
 import org.dubhe.biz.db.utils.PageUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +87,7 @@ public class AuthGroupServiceImpl extends ServiceImpl<AuthGroupMapper, Auth> imp
      * @return Map<String, Object> 权限组分页信息
      */
     @Override
-    public Map<String, Object> queryAll(AuthCodeQueryDTO authCodeQueryDTO) {
+    public PageDTO<AuthVO> page(AuthCodeQueryDTO authCodeQueryDTO) {
 
         Page page = authCodeQueryDTO.toPage();
         QueryWrapper<Auth> queryWrapper = new QueryWrapper<>();
@@ -181,7 +182,7 @@ public class AuthGroupServiceImpl extends ServiceImpl<AuthGroupMapper, Auth> imp
 
     private void untiedWithPermission(Long authId) {
         LambdaQueryWrapper<AuthPermission> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(AuthPermission::getAuthId,authId);
+        lambdaQueryWrapper.eq(AuthPermission::getAuthId, authId);
         authPermissionMapper.delete(lambdaQueryWrapper);
     }
 
@@ -194,7 +195,7 @@ public class AuthGroupServiceImpl extends ServiceImpl<AuthGroupMapper, Auth> imp
     @Override
     public void updateRoleAuth(RoleAuthUpdateDTO roleAuthUpdateDTO) {
         LambdaQueryWrapper<RoleAuth> lambdaUpdateWrapper = new LambdaQueryWrapper<>();
-        lambdaUpdateWrapper.eq(RoleAuth::getRoleId,roleAuthUpdateDTO.getRoleId());
+        lambdaUpdateWrapper.eq(RoleAuth::getRoleId, roleAuthUpdateDTO.getRoleId());
         roleAuthMapper.delete(lambdaUpdateWrapper);
 
         List<RoleAuth> roleAuths = new ArrayList<>();
@@ -218,14 +219,12 @@ public class AuthGroupServiceImpl extends ServiceImpl<AuthGroupMapper, Auth> imp
     public List<AuthVO> getAuthCodeList() {
         List<Auth> authList = authGroupMapper.selectList(new LambdaQueryWrapper<>());
         List<AuthVO> resultList = new ArrayList<>();
-        if (CollUtil.isNotEmpty(authList)) {
-            for (Auth auth : authList) {
-                AuthVO authVO = new AuthVO();
-                BeanUtils.copyProperties(auth, authVO);
-                List<Permission> permissions = authGroupMapper.getPermissionByAuthId(authVO.getId());
-                authVO.setPermissions(permissions);
-                resultList.add(authVO);
-            }
+        for (Auth auth : authList) {
+            AuthVO authVO = new AuthVO();
+            BeanUtils.copyProperties(auth, authVO);
+            List<Permission> permissions = authGroupMapper.getPermissionByAuthId(authVO.getId());
+            authVO.setPermissions(permissions);
+            resultList.add(authVO);
         }
         return resultList;
     }

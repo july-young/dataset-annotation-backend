@@ -17,9 +17,12 @@ package org.dubhe.admin.service;
 
 import org.dubhe.admin.domain.dto.*;
 import org.dubhe.admin.domain.entity.Menu;
+import org.dubhe.admin.domain.vo.MenuVo;
+import org.dubhe.biz.db.utils.PageDTO;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,22 +64,12 @@ public interface MenuService {
      */
     void update(MenuUpdateDTO resources);
 
-    /**
-     * 查询可删除的菜单
-     *
-     * @param menuList
-     * @param menuSet
-     * @return java.util.Set<org.dubhe.domain.entity.Menu>
-     */
-    Set<Menu> getDeleteMenus(List<Menu> menuList, Set<Menu> menuSet);
+    void delete(Set<Long> ids);
 
     /**
      * 获取菜单树
-     *
-     * @param menus 菜单列表
-     * @return java.lang.Object 菜单树结构列表
      */
-    Object getMenuTree(List<Menu> menus);
+    List<MenuTreeDTO> getMenuTree();
 
     /**
      * 根据ID获取菜单列表
@@ -92,7 +85,7 @@ public interface MenuService {
      * @param menuDtos 菜单请求实体
      * @return java.util.Map<java.lang.String, java.lang.Object>  菜单树结构
      */
-    Map<String, Object> buildTree(List<MenuDTO> menuDtos);
+    PageDTO<MenuDTO> buildTree(List<MenuDTO> menuDtos);
 
     /**
      * 根据角色查询菜单列表
@@ -104,11 +97,8 @@ public interface MenuService {
 
     /**
      * 构建菜单树
-     *
-     * @param menuDtos 菜单请求实体
-     * @return java.util.List<org.dubhe.domain.vo.MenuVo> 菜单树返回实例
      */
-    Object buildMenus(List<MenuDTO> menuDtos);
+    List<MenuVo> buildMenus(List<MenuDTO> menuDTOList);
 
     /**
      * 获取菜单
@@ -117,13 +107,6 @@ public interface MenuService {
      * @return org.dubhe.domain.entity.Menu 菜单返回实例
      */
     Menu findOne(Long id);
-
-    /**
-     * 删除菜单
-     *
-     * @param menuSet 删除菜单请求集合
-     */
-    void delete(Set<Menu> menuSet);
 
     /**
      * 导出

@@ -1,21 +1,3 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
-
-
 package org.dubhe.task.constant;
 
 import lombok.Getter;
@@ -65,56 +47,24 @@ import java.util.Arrays;
 public enum TaskQueueNameEnum {
 
 
-    /**
-     * 任务详情
-     */
     DETAIL("dataset:%s:%s:%s:detail:%s","任务详情"),
 
-
-    /**
-     * 完成队列
-     */
     FINISHED("dataset:%s:%s:%s:finished:%s","完成队列"),
 
-
-    /**
-     * 进行中队列
-     */
     PROCESSING("dataset:%s:%s:%s:processing:%s","进行中队列"),
 
-
-    /**
-     * 标注内容
-     */
     ANNOTATION("dataset:%s:%s:%s:annotation:%s","标注内容"),
 
-
-    /**
-     * 待处理队列
-     */
     TASK("dataset:%s:%s:%s:task:001","待处理队列"),
 
-
-    /**
-     * 处理失败队列
-     */
     FAILED("dataset:%s:%s:%s:failed:%s","处理失败队列"),
 
-    /**
-     * failed flag
-     */
     FAILED_TASK("dataset:%s","flag"),
 
-    /**
-     * finish flag
-     */
     FINISHED_TASK("dataset:%s","flag"),
 
     STOP_KEY("dataset:%s:%s:%s:*", "停止时队列前缀"),
 
-    /**
-     * flag
-     */
     PRE_TASK("dataset:%s","flag");
 
     TaskQueueNameEnum(String template, String desc) {
@@ -135,52 +85,21 @@ public enum TaskQueueNameEnum {
     @Getter
     public enum TaskQueueConfigEnum {
 
-        /**
-         * 普通标算法
-         */
         ANNOTATION("annotation", "普通标算法"),
 
+        IMAGE_NET("image_net", "图片分类算法"),
 
-        /**
-         * 图片分类算法
-         */
-        IMAGENET("imagenet", "图片分类算法"),
+        IMG_PROCESS("img_process", "图片增强"),
 
-
-        /**
-         * 图片增强
-         */
-        IMGPROCESS("imgprocess", "图片增强"),
-
-
-        /**
-         * 肺部分割
-         */
         LUNG_SEGMENTATION("lung_segmentation", "肺部分割"),
 
+        OF_RECORD("of_record", "ofrecord转换"),
 
-        /**
-         * ofrecord转换
-         */
-        OFRECORD("ofrecord", "ofrecord转换"),
-
-
-        /**
-         * 文本分类
-         */
         TEXT_CLASSIFICATION("text_classification", "文本分类"),
 
-
-        /**
-         * 目标跟踪
-         */
         TRACK("track", "目标跟踪"),
 
-
-        /**
-         * 视频抽帧算法
-         */
-        VIDEOSAMPLE("videosample", "视频抽帧算法"),
+        VIDEO_SAMPLE("video_sample", "视频抽帧算法"),
 
         ALL("*","所有算法");
 
@@ -207,11 +126,11 @@ public enum TaskQueueNameEnum {
     public static String getTaskNamespace(Integer type) {
         switch (type) {
             case 1:
-                return TaskQueueConfigEnum.OFRECORD.name;
+                return TaskQueueConfigEnum.OF_RECORD.name;
             case 3:
-                return TaskQueueConfigEnum.IMGPROCESS.name;
+                return TaskQueueConfigEnum.IMG_PROCESS.name;
             case 5:
-                return TaskQueueConfigEnum.VIDEOSAMPLE.name;
+                return TaskQueueConfigEnum.VIDEO_SAMPLE.name;
             default:
                 return null;
         }

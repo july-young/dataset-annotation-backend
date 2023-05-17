@@ -1,31 +1,13 @@
-/**
- * Copyright 2019-2020 Zheng Jie
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.dubhe.admin.rest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.dubhe.admin.domain.dto.MenuCreateDTO;
-import org.dubhe.admin.domain.dto.MenuDTO;
-import org.dubhe.admin.domain.dto.MenuDeleteDTO;
-import org.dubhe.admin.domain.dto.MenuQueryDTO;
-import org.dubhe.admin.domain.dto.MenuUpdateDTO;
-import org.dubhe.admin.domain.entity.Menu;
+import org.dubhe.admin.domain.dto.*;
 import org.dubhe.admin.service.MenuService;
 import org.dubhe.biz.base.constant.Permissions;
+import org.dubhe.biz.base.dto.DeleteDTO;
 import org.dubhe.biz.base.vo.DataResponseBody;
+import org.dubhe.biz.db.utils.PageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,9 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @description 菜单管理 控制器
@@ -60,52 +40,48 @@ public class MenuController {
     @ApiOperation("导出菜单数据")
     @GetMapping(value = "/download")
     @PreAuthorize(Permissions.MENU_DOWNLOAD)
-    public void download(HttpServletResponse response, MenuQueryDTO criteria) throws IOException {
-        menuService.download(menuService.queryAll(criteria), response);
+    public void download(HttpServletResponse response, MenuQueryDTO queryDTO) throws IOException {
+        List<MenuDTO> menuDTOList = menuService.queryAll(queryDTO);
+        menuService.download(menuDTOList, response);
     }
 
     @ApiOperation("返回全部的菜单")
     @GetMapping(value = "/tree")
-    public DataResponseBody getMenuTree() {
-        Object menuTree = menuService.getMenuTree(menuService.findByPid(0L));
+    public DataResponseBody<List<MenuTreeDTO>> getMenuTree() {
+        List<MenuTreeDTO> menuTree = menuService.getMenuTree();
         return new DataResponseBody(menuTree);
     }
 
     @ApiOperation("查询菜单")
     @GetMapping
     @PreAuthorize(Permissions.MENU)
-    public DataResponseBody getMenus(MenuQueryDTO criteria) {
+    public DataResponseBody<PageDTO<MenuDTO>> getMenus(MenuQueryDTO criteria) {
         List<MenuDTO> menuDtoList = menuService.queryAll(criteria);
-        return new DataResponseBody(menuService.buildTree(menuDtoList));
+        PageDTO<MenuDTO> menuDTOPageDTO = menuService.buildTree(menuDtoList);
+        return new DataResponseBody(menuDTOPageDTO);
     }
 
     @ApiOperation("新增菜单")
     @PostMapping
     @PreAuthorize(Permissions.MENU_CREATE)
-    public DataResponseBody create(@Valid @RequestBody MenuCreateDTO resources) {
-        return new DataResponseBody(menuService.create(resources));
+    public DataResponseBody create(@Valid @RequestBody MenuCreateDTO createDTO) {
+        MenuDTO menuDTO = menuService.create(createDTO);
+        return new DataResponseBody(menuDTO);
     }
 
     @ApiOperation("修改菜单")
     @PutMapping
     @PreAuthorize(Permissions.MENU_EDIT)
-    public DataResponseBody update(@Valid @RequestBody MenuUpdateDTO resources) {
-        menuService.update(resources);
+    public DataResponseBody update(@Valid @RequestBody MenuUpdateDTO updateDTO) {
+        menuService.update(updateDTO);
         return new DataResponseBody();
     }
 
     @ApiOperation("删除菜单")
     @DeleteMapping
     @PreAuthorize(Permissions.MENU_DELETE)
-    public DataResponseBody delete(@Valid @RequestBody MenuDeleteDTO deleteDTO) {
-        Set<Menu> menuSet = new HashSet<>();
-        Set<Long> ids = deleteDTO.getIds();
-        for (Long id : ids) {
-            List<Menu> menuList = menuService.findByPid(id);
-            menuSet.add(menuService.findOne(id));
-            menuSet = menuService.getDeleteMenus(menuList, menuSet);
-        }
-        menuService.delete(menuSet);
+    public DataResponseBody delete(@Valid @RequestBody DeleteDTO deleteDTO) {
+        menuService.delete(deleteDTO.getIds());
         return new DataResponseBody();
     }
 }

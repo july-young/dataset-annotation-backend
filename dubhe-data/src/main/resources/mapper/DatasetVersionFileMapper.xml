@@ -80,8 +80,8 @@
         and (ddvf.version_name = dd.current_version_name or dd.current_version_name is null)
     </select>
 
-    <select id="getDatasetVersionFileCount" resultType="java.util.HashMap">
-        select annotation_status as status ,count(1) `count` from data_dataset_version_file where dataset_id =
+    <select id="getDatasetVersionFileCount" resultType="javafx.util.Pair">
+        select annotation_status as `key` ,count(1) as `value` from data_dataset_version_file where dataset_id =
         #{datasetId}
         and status != 1
         <if test="versionName != null">
@@ -239,10 +239,13 @@
             </otherwise>
         </choose>
         #{versionName}
-        and dfa.label_id in
-        <foreach item="labelId" collection="labelIds" separator="," open="(" close=")">
-            #{labelId}
-        </foreach>
+        <if test="labelIds != null and  labelIds.size() > 0">
+            and dfa.label_id in
+            <foreach item="labelId" collection="labelIds" separator="," open="(" close=")">
+                #{labelId}
+            </foreach>
+        </if>
+
         and ddvf.status in (0,2)
         and dfa.status != 1
         and dfa.deleted != 1

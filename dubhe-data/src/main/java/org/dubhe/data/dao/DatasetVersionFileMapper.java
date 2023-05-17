@@ -1,23 +1,9 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
+
 
 package org.dubhe.data.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import javafx.util.Pair;
 import org.apache.ibatis.annotations.*;
 import org.dubhe.data.domain.bo.FileUploadBO;
 import org.dubhe.data.domain.dto.DatasetVersionFileDTO;
@@ -26,8 +12,8 @@ import org.dubhe.data.domain.entity.Dataset;
 import org.dubhe.data.domain.entity.DatasetVersionFile;
 import org.dubhe.data.domain.entity.File;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -130,16 +116,6 @@ public interface DatasetVersionFileMapper extends BaseMapper<DatasetVersionFile>
     Integer getSourceFileCount(@Param("dataset") Dataset dataset);
 
     /**
-     * 更新数据集版本文件状态
-     *
-     * @param datasetVersionFile 数据集版本文件实体
-     * @param status             数据集文件状态
-     */
-    @Update("update data_dataset_version_file set annotation_status = #{status} where dataset_id = #{datasetVersionFile.datasetId} " +
-            " and (version_name = #{datasetVersionFile.versionName} or version_name is NULL) and file_id = #{datasetVersionFile.fileId} and annotation_status = #{datasetVersionFile.status}")
-    void updateStatus(@Param("datasetVersionFile") DatasetVersionFile datasetVersionFile, @Param("status") Integer status);
-
-    /**
      * 获取数据集的版本文件数据
      *
      * @param datasetIds 数据集IDS
@@ -154,8 +130,7 @@ public interface DatasetVersionFileMapper extends BaseMapper<DatasetVersionFile>
      * @param versionName  数据集版本名称
      * @return Map<Integer, Integer>   数据集文件状态统计数据
      */
-    @MapKey("status")
-    Map<Integer, Integer> getDatasetVersionFileCount(@Param("datasetId") Long datasetId, @Param("versionName") String versionName);
+    List<Pair<Integer,Long>> getDatasetVersionFileCount(@Param("datasetId") Long datasetId, @Param("versionName") String versionName);
 
     /**
      * 根据数据集ID删除数据版本文件数据
@@ -269,7 +244,7 @@ public interface DatasetVersionFileMapper extends BaseMapper<DatasetVersionFile>
      * @return List<DatasetVersionFile>
      */
     List<Long> findByDatasetIdAndVersionNameAndStatus(@Param("datasetId") Long datasetId, @Param("versionName") String currentVersionName,
-                                                      @Param("labelIds") Long[] labelIds);
+                                                      @Param("labelIds") List<Long> labelIds);
 
     /**
      * 搜索时获取文件offset
@@ -292,7 +267,7 @@ public interface DatasetVersionFileMapper extends BaseMapper<DatasetVersionFile>
      * @param fileIds           文件id
      * @return List<Long>       版本文件id
      */
-    List<Long> getVersionFileIdsByFileIds(@Param("datasetId") Long datasetId,@Param("fileIds")List<Long> fileIds);
+    List<Long> getVersionFileIdsByFileIds(@Param("datasetId") Long datasetId,@Param("fileIds") Collection<Long> fileIds);
 
     /**
      * 获取版本文件id

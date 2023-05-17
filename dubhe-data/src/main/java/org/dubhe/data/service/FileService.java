@@ -1,24 +1,10 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
+
 
 package org.dubhe.data.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.dubhe.biz.db.utils.PageDTO;
 import org.dubhe.biz.file.dto.FilePageDTO;
 import org.dubhe.data.domain.bo.FileAnnotationBO;
 import org.dubhe.data.domain.bo.TaskSplitBO;
@@ -33,6 +19,7 @@ import org.dubhe.data.domain.vo.FileQueryCriteriaVO;
 import org.dubhe.data.domain.vo.FileScreenStatVO;
 import org.dubhe.data.domain.vo.FileVO;
 import org.dubhe.biz.base.vo.ProgressVO;
+import org.dubhe.data.domain.vo.TxtFileVO;
 import org.dubhe.data.machine.enums.FileStateEnum;
 
 import java.util.Collection;
@@ -63,7 +50,7 @@ public interface FileService {
      * @param fileQueryCriteria 查询文件参数
      * @return Map<String, Object> 文件查询列表
      */
-    Map<String, Object> listPage(Long datasetId, Page page, FileQueryCriteriaVO fileQueryCriteria);
+    PageDTO<FileVO> listPage(Long datasetId, Page page, FileQueryCriteriaVO fileQueryCriteria);
 
     /**
      * 文件查询，物体检测标注页面使用
@@ -72,10 +59,10 @@ public interface FileService {
      * @param offset    offset
      * @param limit     页容量
      * @param page      分页条件
-     * @param type      文件类型
+     * @param typeList      文件类型
      * @return Page<File> 文件查询列表
      */
-    Page<File> listByLimit(Long datasetId, Long offset, Integer limit, Integer page, Integer[] type, Long[] labelId);
+    PageDTO<File> listByLimit(Long datasetId, Long offset, Integer limit, Integer page, Set<Integer> typeList, List<Long> labelIdList);
 
     /**
      * 获取offset
@@ -168,7 +155,7 @@ public interface FileService {
      *
      * @param datasetId 数据集id
      */
-    void delete(Long datasetId);
+    void delete(List<Long> datasetId);
 
     /**
      * 判断视频数据集是否已存在视频
@@ -251,7 +238,7 @@ public interface FileService {
      * @param fileQueryCriteria 查询文件参数
      * @return Map<String, Object> 文件查询列表
      */
-    Map<String, Object> audioFilesByPage(Long datasetId, Page page, FileQueryCriteriaVO fileQueryCriteria);
+    PageDTO<TxtFileVO> audioFilesByPage(Long datasetId, Page page, FileQueryCriteriaVO fileQueryCriteria);
 
     /**
      * 文本数据集文件查询
@@ -261,7 +248,7 @@ public interface FileService {
      * @param fileQueryCriteria 查询文件参数
      * @return Map<String, Object> 文件查询列表
      */
-    Map<String, Object> txtContentByPage(Long datasetId, Page page, FileQueryCriteriaVO fileQueryCriteria);
+    PageDTO txtContentByPage(Long datasetId, Page page, FileQueryCriteriaVO fileQueryCriteria);
 
     /**
      * 文本状态数量统计
@@ -324,10 +311,8 @@ public interface FileService {
 
     /**
      * 删除es中数据
-     *
-     * @param fileIds 文件ID数组
      */
-    void deleteEsData(Long[] fileIds);
+    void deleteEsData(List<Long> fileIds);
 
     /**
      * 获取文件列表

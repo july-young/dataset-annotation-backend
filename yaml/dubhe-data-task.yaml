@@ -24,18 +24,13 @@ recycle:
     file: 18000
     # 数据集版本文件 5小时
     version-file: 18000
-
-# 数据处理医学影像数据集dcm服务器配置，查看影像功能需要使用该服务
-dcm:
-  host: 10.255.198.101
-  port: 11112
   
 # ES服务地址及端口
 es:
-  host: 10.255.198.101
+  host: 192.168.199.187
   serverPort: 32321
   transportPort: 32311
-  clusterName: docker-cluster
+  clusterName: kubernetes-logging
   index: dataset_text_test
 
 # serving预测上传文件大小限制

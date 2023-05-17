@@ -89,7 +89,8 @@ public class Menu extends BaseEntity implements Serializable {
     private Long pid;
 
     @TableField(value = "deleted",fill = FieldFill.INSERT)
-    private Boolean deleted;
+    @TableLogic
+    private Boolean deleted=false;
 
     /**
      * 回到上一级

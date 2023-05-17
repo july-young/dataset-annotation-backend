@@ -1,19 +1,4 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
+
 
 package org.dubhe.data.domain.entity;
 
@@ -22,7 +7,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import lombok.experimental.Accessors;
-import org.dubhe.biz.base.dto.TeamDTO;
 import org.dubhe.biz.base.dto.UserDTO;
 import org.dubhe.biz.base.enums.DatasetTypeEnum;
 import org.dubhe.data.domain.dto.DatasetCreateDTO;
@@ -48,6 +32,7 @@ public class Dataset {
     private static final long serialVersionUID = 1L;
 
     @TableField("deleted")
+    @TableLogic
     private Boolean deleted = false;
 
     /**
@@ -63,13 +48,11 @@ public class Dataset {
     @ApiModelProperty(value = "类型 0: private 私有数据,  1:team  团队数据  2:public 公开数据")
     private Integer type;
 
-    @ApiModelProperty(value = "数据类型:0图片,1视频, 2文本")
+    @ApiModelProperty(value = "数据类型:0图片,1视频, 2文本,3表格")
     private Integer dataType;
 
     @ApiModelProperty(value = "标注类型：2分类,1目标检测,5目标跟踪，6本文分类")
     private Integer annotateType;
-
-    private Long teamId;
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -77,7 +60,7 @@ public class Dataset {
     @ApiModelProperty(value = "数据集存储位置")
     private String uri;
 
-    @ApiModelProperty(value = "0:未标注，1:手动标注中，2:自动标注中，3:自动标注完成，4:标注完成")
+    @ApiModelProperty(value = "101:未标注 102:手动标注中 103:自动标注中 104:自动标注完成 105:标注完成 201:目标跟踪中 202:目标跟踪完成 203:目标跟踪失败 301:未采样 302:采样中 303:采样失败 401:增强中 402:导入中")
     private Integer status;
 
     @ApiModelProperty(value = "当前版本号")
@@ -105,12 +88,6 @@ public class Dataset {
 
     @ApiModelProperty(value = "数据集源ID")
     private Long sourceId;
-
-    /**
-     * 团队
-     */
-    @TableField(exist = false)
-    private TeamDTO team;
 
     /**
      * 创建用户
@@ -153,7 +130,6 @@ public class Dataset {
         this.name = datasetCreateDTO.getName();
         this.remark = datasetCreateDTO.getRemark();
         this.type = datasetCreateDTO.getType();
-        this.teamId = datasetCreateDTO.getTeamId();
         this.dataType = datasetCreateDTO.getDataType();
         this.annotateType = datasetCreateDTO.getAnnotateType();
         this.isImport = datasetCreateDTO.isImport();

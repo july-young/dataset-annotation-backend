@@ -1,12 +1,12 @@
 /**
  * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,37 +58,43 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     /**
      * 捞取用户信息
+     *
      * @param username
      * @return
      * @throws UsernameNotFoundException
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserContext userContext;
         //根据adminUserService 子类是否加载 采取不同的方式获取用户信息
-        DataResponseBody<UserContext> responseBody = Objects.isNull(adminUserService)
-                ? adminClient.findUserByUsername(username) : adminUserService.findUserByUsername(username);
-        if (responseBody == null || Objects.isNull(responseBody.getData())){
-            throw new BusinessException(responseBody.getMsg());
+        if (adminUserService == null) {
+            DataResponseBody<UserContext> responseBody = adminClient.findUserByUsername(username);
+            if (responseBody == null || responseBody.getData() == null || !responseBody.succeed()) {
+                throw new BusinessException(responseBody.getMsg());
+            }
+            userContext = responseBody.getData();
+        } else {
+            userContext = adminUserService.findUserByUsername(username);
         }
-        UserContext data = responseBody.getData();
-         // 用户权限列表，根据用户拥有的权限标识与如 @PreAuthorize("hasAuthority('user')") 标注的接口对比，决定是否可以调用接口
-        Set<String> permissions = findPermissions(data.getRoles());
+        // 用户权限列表，根据用户拥有的权限标识与如 @PreAuthorize("hasAuthority('user')") 标注的接口对比，决定是否可以调用接口
+        Set<String> permissions = findPermissions(userContext.getRoles());
         List<GrantedAuthority> grantedAuthorities = permissions.stream().map(GrantedAuthorityImpl::new).collect(Collectors.toList());
-        return new JwtUserDTO(data, grantedAuthorities);
+        return new JwtUserDTO(userContext, grantedAuthorities);
     }
 
     /**
      * 固定权限
+     *
      * @return
      */
     private Set<String> findPermissions(List<SysRoleDTO> roles) {
         Set<String> permissions = new HashSet<>();
-        roles.forEach(a->{
-            permissions.add("ROLE_"+a.getName());
+        roles.forEach(a -> {
+            permissions.add("ROLE_" + a.getName());
             List<SysPermissionDTO> permissionsNames = a.getPermissions();
-            if(!CollectionUtils.isEmpty(permissionsNames)){
-                permissionsNames.forEach(b->{
-                    permissions.add("ROLE_"+b.getPermission());
+            if (!CollectionUtils.isEmpty(permissionsNames)) {
+                permissionsNames.forEach(b -> {
+                    permissions.add("ROLE_" + b.getPermission());
                 });
 
             }

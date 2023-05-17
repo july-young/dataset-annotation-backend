@@ -1,12 +1,12 @@
 /**
  * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,6 +39,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.util.LinkedMultiValueMap;
@@ -54,7 +55,7 @@ import java.util.Map;
  * @description 基础测试类
  * @date 2020-04-20
  */
-@ActiveProfiles(value = "dev")
+@ActiveProfiles(value = "cloud-test")
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableTransactionManagement
@@ -118,12 +119,12 @@ public class BaseTest {
 
     /**
      * @param response 响应结果
-     * @param  i 响应码
-     * @param @throws UnsupportedEncodingException 入参
+     * @param i        响应码
+     * @param @throws  UnsupportedEncodingException 入参
      * @return void 返回类型
      * @throws @Title: mockMvcWithNoRequestBody
      */
-    public void mockMvcWithNoRequestBody(MockHttpServletResponse response, int i) throws UnsupportedEncodingException {
+    public String mockMvcWithNoRequestBody(MockHttpServletResponse response, int i) throws UnsupportedEncodingException {
         response.setCharacterEncoding("UTF-8");
         // 得到返回代码
         int status = response.getStatus();
@@ -132,10 +133,25 @@ public class BaseTest {
         // 断言，判断返回代码是否正确
         Assert.assertEquals(i, status);
         System.out.println("返回的参数" + content);
+
+        return content;
+    }
+
+    public String mockHttp(MockHttpServletRequestBuilder mockHttpServletRequestBuilder) throws Exception {
+        String accessToken = obtainAccessToken();
+        return mockMvcWithNoRequestBody(mockMvc.perform(mockHttpServletRequestBuilder
+                .header(AuthConst.AUTHORIZATION, AuthConst.ACCESS_TOKEN_PREFIX + accessToken))
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn().getResponse(), 200);
+    }
+
+    public String mockHttpWithoutLogin(MockHttpServletRequestBuilder mockHttpServletRequestBuilder) throws Exception {
+        return mockMvcWithNoRequestBody(mockMvc.perform(mockHttpServletRequestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn().getResponse(), 200);
     }
 
     /**
-     *  模拟登录获取token
+     * 模拟登录获取token
+     *
      * @return String  token
      */
     public String obtainAccessToken() {

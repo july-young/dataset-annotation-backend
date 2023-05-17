@@ -1,12 +1,12 @@
 /**
  * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,17 +25,15 @@ import org.dubhe.biz.base.constant.MagicNumConstant;
 import org.dubhe.biz.base.constant.NumberConstant;
 import org.dubhe.biz.base.enums.OperationTypeEnum;
 import org.dubhe.biz.base.exception.BusinessException;
-import org.dubhe.data.statemachine.dto.StateChangeDTO;
+import org.dubhe.data.machine.statemachine.DataStateMachine;
 import org.dubhe.data.constant.*;
 import org.dubhe.data.dao.TaskMapper;
 import org.dubhe.data.domain.bo.EnhanceTaskSplitBO;
 import org.dubhe.data.domain.dto.AutoAnnotationCreateDTO;
 import org.dubhe.data.domain.entity.*;
 import org.dubhe.data.machine.constant.DataStateCodeConstant;
-import org.dubhe.data.machine.constant.DataStateMachineConstant;
 import org.dubhe.data.machine.enums.DataStateEnum;
 import org.dubhe.data.machine.utils.StateIdentifyUtil;
-import org.dubhe.data.machine.utils.StateMachineUtil;
 import org.dubhe.data.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -52,6 +50,9 @@ import java.util.stream.Collectors;
  */
 @Service
 public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements TaskService {
+
+    @Autowired
+    private DataStateMachine dataStateMachine;
 
     private static final Set<Integer> NOT_AUTO_ANNOTATE = new HashSet<Integer>() {{
         add(DataStateCodeConstant.AUTOMATIC_LABELING_STATE);
@@ -77,6 +78,16 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
     private LabelGroupService labelGroupService;
 
     /**
+     * 暂时只支持数据集的提交
+     *
+     * @param autoAnnotationCreateDTO 自动标注dto
+     * @return List<Long> 自动标注生成的父任务id列表
+     */
+    public List<Long> auto(AutoAnnotationCreateDTO autoAnnotationCreateDTO) {
+        return create(autoAnnotationCreateDTO);
+    }
+
+    /**
      * 十分钟(单位ms)
      */
     private final static Long FAIL_TIME = 600000L;
@@ -89,13 +100,14 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
      */
     public List<Long> create(AutoAnnotationCreateDTO autoAnnotationCreateDTO) {
         List<Long> result = new ArrayList<>();
-        Arrays.stream(autoAnnotationCreateDTO.getDatasetIds()).forEach(aLong -> {
-            Dataset dataset = datasetService.getOneById(aLong);
+        autoAnnotationCreateDTO.getDatasetIds().forEach(datasetId -> {
+            Dataset dataset = datasetService.getOneById(datasetId);
             // 如果选择了有标注信息或者全部文件时，则需要清理已有标注信息
             if (Arrays.asList(FileTypeEnum.All.getValue(), FileTypeEnum.HAVE_ANNOTATION.getValue()).contains(autoAnnotationCreateDTO.getFileStatus())) {
                 clearAnnotation(dataset);
             }
-            result.add(create(aLong, autoAnnotationCreateDTO));
+            Long taskId=create(datasetId, autoAnnotationCreateDTO);
+            result.add(taskId);
         });
         return result;
     }
@@ -107,11 +119,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
      */
     public void clearAnnotation(Dataset dataset) {
         //改数据集相关状态
-        StateMachineUtil.stateChange(new StateChangeDTO() {{
-            setStateMachineType(DataStateMachineConstant.DATA_STATE_MACHINE);
-            setEventMethodName(DataStateMachineConstant.DATA_DELETE_ANNOTATING_EVENT);
-            setObjectParam(new Object[]{dataset.getId().intValue()});
-        }});
+        dataStateMachine.deleteAnnotatingEvent(dataset.getId());
 
         //根据当前数据集ID修改Changed字段为改变
         datasetVersionFileService.updateChanged(dataset.getId(), dataset.getCurrentVersionName());
@@ -123,8 +131,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
      * 只对未标注状态的文件进行标注
      * 如果待标注的文件为空，则抛异常
      *
-     * @param datasetId 数据集id
-     * @param autoAnnotationCreateDTO      标注类型
+     * @param datasetId               数据集id
+     * @param autoAnnotationCreateDTO 标注类型
      * @return Long 父任务id
      */
     @Transactional(rollbackFor = Exception.class)
@@ -169,7 +177,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
             taskType = DataTaskTypeEnum.TEXT_CLASSIFICATION.getValue();
         }
         Task task = Task.builder()
-                .status(TaskStatusEnum.INIT.getValue())
+                .status(TaskStatusEnum.UN_ASSIGN.getValue())
                 .datasets(JSON.toJSONString(datasetIds))
                 .files(JSON.toJSONString(Collections.EMPTY_LIST))
                 .dataType(dataset.getDataType())
@@ -181,22 +189,18 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
                 .type(taskType)
                 .fileType(autoAnnotationCreateDTO.getFileStatus())
                 .build();
-        if(autoAnnotationCreateDTO.getModelServiceId() != null){
+        if (autoAnnotationCreateDTO.getModelServiceId() != null) {
             task.setModelServiceId(autoAnnotationCreateDTO.getModelServiceId());
         }
         baseMapper.insert(task);
 
-        //嵌入状态机
-        StateMachineUtil.stateChange(new StateChangeDTO() {{
-            setStateMachineType(DataStateMachineConstant.DATA_STATE_MACHINE);
-            setEventMethodName(DataStateMachineConstant.DATA_AUTO_ANNOTATIONS_EVENT);
-            setObjectParam(new Object[]{dataset.getId().intValue()});
-        }});
+        dataStateMachine.autoAnnotationsEvent(dataset.getId());
         return task.getId();
     }
 
     /**
      * 目标跟踪
+     *
      * @param dataset
      */
     @Override
@@ -204,11 +208,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
     public void track(Dataset dataset, Long modelServiceId) {
         //目标追踪中
         //嵌入数据集状态机
-        StateMachineUtil.stateChange(new StateChangeDTO() {{
-            setObjectParam(new Object[]{dataset});
-            setEventMethodName(DataStateMachineConstant.DATA_TRACK_EVENT);
-            setStateMachineType(DataStateMachineConstant.DATA_STATE_MACHINE);
-        }});
+        dataStateMachine.trackEvent(dataset);
         Task task = Task.builder().total(NumberConstant.NUMBER_1)
                 .datasetId(dataset.getId())
                 .type(DataTaskTypeEnum.TARGET_TRACK.getValue())
@@ -235,26 +235,26 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
      * @param task 只能有id，或者其它字段与数据库保持一致，否则会被写入数据库
      */
     public void fail(Task task) {
-        task.setStatus(TaskStatusEnum.FAIL.getValue());
+        task.setStatus(TaskStatusEnum.FINISHED.getValue());
         getBaseMapper().updateById(task);
 
         List<Long> datasetIds = JSON.parseArray(task.getDatasets(), Long.class);
         if (CollectionUtils.isEmpty(datasetIds)) {
             return;
         }
-        datasetIds.forEach(i -> {
-                    datasetService.updateStatus(i,
-                            stateIdentify.getStatusForRollback(i, datasetService.getById(i).getCurrentVersionName())
-                    );
-                }
-        );
+        for (Long datasetId : datasetIds) {
+            String currentVersionName = datasetService.getById(datasetId).getCurrentVersionName();
+            datasetService.getById(datasetId).getCurrentVersionName();
+            DataStateEnum statusForRollback = stateIdentify.getStatusForRollback(datasetId, currentVersionName);
+            datasetService.updateStatus(datasetId, statusForRollback);
+        }
     }
 
     /**
      * 完成任务的文件
      *
-     * @param enhanceTaskSplitBO       任务
-     * @param fileNum                  文件数量
+     * @param enhanceTaskSplitBO 任务
+     * @param fileNum            文件数量
      */
     @Override
     public void finishTaskFile(EnhanceTaskSplitBO enhanceTaskSplitBO, Integer fileNum) {
@@ -266,20 +266,17 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
         task = baseMapper.selectById(enhanceTaskSplitBO.getId());
         if (task.getFinished() >= task.getTotal()) {
             //嵌入数据集状态机
-            StateMachineUtil.stateChange(new StateChangeDTO() {{
-                setObjectParam(new Object[]{datasetService.getOneById(enhanceTaskSplitBO.getDatasetId())});
-                setEventMethodName(DataStateMachineConstant.DATA_ENHANCE_FINISH_EVENT);
-                setStateMachineType(DataStateMachineConstant.DATA_STATE_MACHINE);
-            }});
+            Dataset dataset = datasetService.getOneById(enhanceTaskSplitBO.getDatasetId());
+            dataStateMachine.enhanceFinishEvent(dataset);
         }
     }
 
     /**
      * 完成文件
      *
-     * @param taskId       任务id
-     * @param filesCount   完成的文件数量
-     * @param dataset      数据集
+     * @param taskId     任务id
+     * @param filesCount 完成的文件数量
+     * @param dataset    数据集
      * @return ture or false
      */
     @Override
@@ -290,14 +287,10 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
             throw new BusinessException(ErrorEnum.TASK_ABSENT);
         }
         if (task.getFinished() >= task.getTotal()) {
-            task.setStatus(TaskStatusEnum.FINISHED.getValue());
+            task.setStatus(TaskStatusEnum.RUNNING.getValue());
             getBaseMapper().updateById(task);
             //嵌入数据集状态机
-            StateMachineUtil.stateChange(new StateChangeDTO() {{
-                setObjectParam(new Object[]{dataset});
-                setEventMethodName(DataStateMachineConstant.DATA_DO_FINISH_AUTO_ANNOTATION_EVENT);
-                setStateMachineType(DataStateMachineConstant.DATA_STATE_MACHINE);
-            }});
+            dataStateMachine.doFinishAutoAnnotationEvent(dataset);
             return true;
         }
         return false;
@@ -321,9 +314,9 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
     /**
      * 更新任务状态
      *
-     * @param taskId        任务ID
-     * @param sourceStatus  原状态
-     * @param targetStatus  目的状态
+     * @param taskId       任务ID
+     * @param sourceStatus 原状态
+     * @param targetStatus 目的状态
      * @return 更新数量
      */
     @Override
@@ -456,13 +449,13 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
     }
 
     @Override
-    public Long selectTaskId(Long datasetId,Integer datasetStatus) {
-        return baseMapper.selectTaskId(datasetId,datasetStatus);
+    public Long selectTaskId(Long datasetId, Integer datasetStatus) {
+        return baseMapper.selectTaskId(datasetId, datasetStatus);
     }
 
     @Override
-    public Long selectStopTaskId(Long taskId,Long datasetId,Integer datasetStatus) {
-        return baseMapper.selectStopTaskId(taskId,datasetId,datasetStatus);
+    public Long selectStopTaskId(Long taskId, Long datasetId, Integer datasetStatus) {
+        return baseMapper.selectStopTaskId(taskId, datasetId, datasetStatus);
     }
 
     @Override

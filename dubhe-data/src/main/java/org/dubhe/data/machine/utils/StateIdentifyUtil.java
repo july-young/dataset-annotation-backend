@@ -1,20 +1,3 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
-
 package org.dubhe.data.machine.utils;
 
 import org.dubhe.data.domain.entity.Dataset;
@@ -24,9 +7,7 @@ import org.dubhe.data.machine.utils.identify.setting.StateIdentifySetting;
 import org.dubhe.data.machine.utils.identify.setting.StateSelect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ReflectionUtils;
 
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
@@ -35,7 +16,7 @@ import java.util.Set;
  * @date 2020-09-24
  */
 @Component
-public class StateIdentifyUtil{
+public class StateIdentifyUtil {
 
 
     /**
@@ -45,27 +26,19 @@ public class StateIdentifyUtil{
     private DataHub dataHub;
 
     /**
-     * 状态判断类
-     */
-    @Autowired
-    private StateSelect stateSelect;
-
-    /**
-     * 状态判断中所有的自定义方法数组
-     */
-    private final Method[] method = ReflectionUtils.getDeclaredMethods(StateSelect.class);
-
-    /**
      * 获取数据集状态(指定版本)
      *
      * @param datasetId               数据集id
      * @param versionName             数据集版本名称
-     * @param needFileStateDoIdentify 是否需要查询文件状态判断
      * @return DatasetStatusEnum      数据集状态(指定版本)
      */
-    public DataStateEnum getStatus(Long datasetId, String versionName, boolean needFileStateDoIdentify) {
-        return needFileStateDoIdentify ? new IdentifyDatasetStateByFileState(datasetId, versionName, StateIdentifySetting.NEED_FILE_STATE_DO_IDENTIFY)
-                .getStatus() : dataHub.getDatasetStatus(datasetId);
+    public DataStateEnum getStatus(Long datasetId, String versionName) {
+        IdentifyDatasetStateByFileState fileState = new IdentifyDatasetStateByFileState(datasetId, versionName, StateIdentifySetting.NEED_FILE_STATE_DO_IDENTIFY);
+        return fileState.getStatus();
+    }
+
+    public DataStateEnum getStatus(Long datasetId) {
+        return dataHub.getDatasetStatus(datasetId);
     }
 
     /**
@@ -109,16 +82,10 @@ public class StateIdentifyUtil{
             state = dataHub.getDatasetStatus(datasetId);
             if (dataStateEnums.contains(state)) {
                 List<Integer> stateList = dataHub.getFileStatusListByDatasetAndVersion(datasetId, versionName);
-                if (stateList == null || stateList.isEmpty()) {
-                    state = DataStateEnum.NOT_ANNOTATION_STATE;
+                DataStateEnum res = StateSelect.judge(stateList);
+                if (res != null) {
+                    state = res;
                     return;
-                }
-                for (Method stateSelectMethod : method) {
-                    DataStateEnum res = (DataStateEnum) ReflectionUtils.invokeMethod(stateSelectMethod, stateSelect, new Object[]{stateList});
-                    if (res != null) {
-                        state=res;
-                        return;
-                    }
                 }
             }
         }

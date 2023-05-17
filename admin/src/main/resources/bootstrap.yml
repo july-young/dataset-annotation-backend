@@ -29,5 +29,5 @@ spring:
         namespace: dataset-annotation
         group: dubhe
         server-addr: localhost:8848
-        ip: 10.252.1.7
+
 

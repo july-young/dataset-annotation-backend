@@ -1,12 +1,12 @@
 /**
  * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,10 +22,10 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import javafx.util.Pair;
 import org.apache.commons.lang.ArrayUtils;
 import org.dubhe.biz.base.constant.MagicNumConstant;
 import org.dubhe.biz.base.constant.NumberConstant;
@@ -33,21 +33,18 @@ import org.dubhe.biz.base.service.UserContextService;
 import org.dubhe.biz.base.utils.StringUtils;
 import org.dubhe.biz.log.enums.LogEnum;
 import org.dubhe.biz.log.utils.LogUtil;
-import org.dubhe.data.statemachine.dto.StateChangeDTO;
+import org.dubhe.data.machine.statemachine.FileStateMachine;
 import org.dubhe.data.constant.*;
 import org.dubhe.data.dao.DatasetVersionFileMapper;
 import org.dubhe.data.domain.bo.FileUploadBO;
 import org.dubhe.data.domain.dto.DatasetVersionFileDTO;
 import org.dubhe.data.domain.entity.*;
 import org.dubhe.data.machine.constant.FileStateCodeConstant;
-import org.dubhe.data.machine.constant.FileStateMachineConstant;
-import org.dubhe.data.machine.utils.StateMachineUtil;
 import org.dubhe.data.service.DataFileAnnotationService;
 import org.dubhe.data.service.DatasetService;
 import org.dubhe.data.service.DatasetVersionFileService;
 import org.dubhe.data.service.FileService;
 import org.dubhe.data.util.GeneratorKeyUtil;
-import org.dubhe.data.util.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -70,6 +67,9 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
 
     @Resource
     private DatasetVersionFileMapper datasetVersionFileMapper;
+
+    @Autowired
+    private FileStateMachine fileStateMachine;
 
     @Resource
     @Lazy
@@ -123,7 +123,7 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
             datasetVersionFile.setId(dataFileIds.poll());
         }
         datasetVersionFileMapper.saveList(data);
-        LogUtil.debug(LogEnum.BIZ_DATASET, "save dataset version files end, times {}" , (System.currentTimeMillis() - start));
+        LogUtil.debug(LogEnum.BIZ_DATASET, "save dataset version files end, times {}", (System.currentTimeMillis() - start));
     }
 
     /**
@@ -135,7 +135,7 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
      */
     @Override
     public void newShipVersionNameChange(Long datasetId, String versionSource, String versionTarget) {
-        List<DataFileAnnotation> dataFileAnnotations = dataFileAnnotationService.getAnnotationByVersion(datasetId,versionSource,
+        List<DataFileAnnotation> dataFileAnnotations = dataFileAnnotationService.getAnnotationByVersion(datasetId, versionSource,
                 MagicNumConstant.ZERO);
         datasetVersionFileMapper.newShipVersionNameChange(datasetId, versionSource, versionTarget);
         List<DataFileAnnotation> updateAnnotations = new ArrayList<>();
@@ -161,9 +161,25 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
         List<DatasetVersionFile> files = datasetVersionFileMapper.selectByDatasetIdAndVersionNameAndFileIds(datasetId, versionName, fileIds);
         if (!CollectionUtils.isEmpty(files) && Objects.isNull(versionName)) {
             List<Long> ids = files.stream().map(a -> a.getId()).collect(Collectors.toList());
-            dataFileAnnotationService.updateStatusByVersionIds(datasetId,ids, true);
+            dataFileAnnotationService.updateStatusByVersionIds(datasetId, ids, true);
         }
         datasetVersionFileMapper.updateStatusByFileIdAndDatasetId(datasetId, versionName, fileIds);
+    }
+
+    @Override
+    public List<Long> getFileIds(Long datasetId, String versionName) {
+        LambdaQueryWrapper<DatasetVersionFile> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DatasetVersionFile::getDatasetId, datasetId);
+        lambdaQueryWrapper.eq(DatasetVersionFile::getVersionName, versionName);
+        lambdaQueryWrapper.select(DatasetVersionFile::getFileId);
+        List<Object> objects = datasetVersionFileMapper.selectObjs(lambdaQueryWrapper);
+        return objects.stream().filter(Objects::nonNull).map(x -> Long.parseLong(x.toString())).collect(Collectors.toList());
+    }
+
+    public void delete(Long datasetId, String versionName, List<Long> fileIds) {
+        datasetVersionFileMapper.updateStatusByFileIdAndDatasetId(datasetId, versionName, fileIds);
+        //删除数据集标注接口
+        dataFileAnnotationService.updateStatusByVersionIds(datasetId, fileIds, true);
     }
 
 
@@ -202,30 +218,21 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
         if (versionFile != null) {
             datasetVersionFile.setChanged(Constant.CHANGED);
         }
-        //创建入参请求体
-        StateChangeDTO stateChangeDTO = new StateChangeDTO();
-        //创建需要执行事件的方法的传入参数
-        Object[] objects = new Object[1];
-        objects[0] = datasetVersionFile;
-        stateChangeDTO.setObjectParam(objects);
-        stateChangeDTO.setStateMachineType(FileStateMachineConstant.FILE_STATE_MACHINE);
         //执行自动标注算法事件
         if (targetStatus.equals(FileStateCodeConstant.MANUAL_ANNOTATION_FILE_STATE)) {
-            stateChangeDTO.setEventMethodName(FileStateMachineConstant.FILE_MANUAL_ANNOTATION_SAVE_EVENT);
+            fileStateMachine.manualAnnotationSaveEvent(datasetVersionFile);
         }
         if (targetStatus.equals(FileStateCodeConstant.ANNOTATION_COMPLETE_FILE_STATE)) {
-            stateChangeDTO.setEventMethodName(FileStateMachineConstant.FILE_SAVE_COMPLETE_EVENT);
+            fileStateMachine.saveCompleteEvent(datasetVersionFile);
         }
-        //=======================嵌入状态机===================================//
-        StateMachineUtil.stateChange(stateChangeDTO);
         return 0;
     }
 
     /**
      * 获取数据集指定版本下文件列表(有效文件)
      *
-     * @param datasetId                 数据id
-     * @param versionName               版本名称
+     * @param datasetId   数据id
+     * @param versionName 版本名称
      * @return List<DatasetVersionFile> 版本文件列表
      */
     @Override
@@ -245,45 +252,52 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
      *
      * @param datasetId   数据集id
      * @param versionName 版本名称
-     * @param status      状态
+     * @param statusSet   状态
      * @param offset      偏移量
      * @param limit       页容量
      * @param order       排序方式
      * @return 数据集版本文件列表
      */
     @Override
-    public List<DatasetVersionFileDTO> getListByDatasetIdAndAnnotationStatus(Long datasetId, String versionName, Integer[] status, Long offset, Integer limit, String orderByName, String order, Long[] labelId) {
-        order = Objects.isNull(order) ? "asc" : order;
+    public List<DatasetVersionFileDTO> getListByDatasetIdAndAnnotationStatus(Long datasetId, String versionName, Set<Integer> statusSet, Long offset, Integer limit, String orderByName, String order, List<Long> labelIdList) {
+
+        if (statusSet == null) statusSet = new HashSet<>();
+        order = order == null ? "asc" : order;
         Dataset oneById = datasetService.getOneById(datasetId);
-        List<DataFileAnnotation> labelIdByDatasetIdAndVersionId = new ArrayList<>();
-        if(!ArrayUtils.isEmpty(labelId) || (DatatypeEnum.AUDIO.getValue().equals(oneById.getDataType()) &&
-                !Arrays.asList(status).contains(FileTypeEnum.UNFINISHED_FILE.getValue()) && !Arrays.asList(status).contains(FileTypeEnum.UNFINISHED.getValue())) &&
-                !oneById.getAnnotateType().equals(AnnotateTypeEnum.SPEECH_RECOGNITION.getValue())){
-            labelIdByDatasetIdAndVersionId = dataFileAnnotationService.getLabelIdByDatasetIdAndVersionId(labelId, datasetId,offset,limit, oneById.getCurrentVersionName());
-            if(labelIdByDatasetIdAndVersionId.isEmpty()){
+        List<DataFileAnnotation> dataFileAnnotationList = new ArrayList<>();
+        if (!labelIdList.isEmpty()
+                || (DatatypeEnum.AUDIO.getValue().equals(oneById.getDataType())
+                && !statusSet.contains(FileTypeEnum.UNFINISHED_FILE.getValue())
+                && !statusSet.contains(FileTypeEnum.UNFINISHED.getValue()))
+                && !AnnotateTypeEnum.SPEECH_RECOGNITION.getValue().equals(oneById.getAnnotateType())) {
+            dataFileAnnotationList = dataFileAnnotationService.getLabelIdByDatasetIdAndVersionId(labelIdList, datasetId, offset, limit, oneById.getCurrentVersionName());
+            if (dataFileAnnotationList.isEmpty()) {
                 return null;
             }
         }
-        List<DatasetVersionFileDTO> idByDatasetIdAndAnnotationStatus = datasetVersionFileMapper.getIdByDatasetIdAndAnnotationStatus(
-                datasetId, versionName, status==null?null:new HashSet<Integer>(Arrays.asList(status)),
-                orderByName, offset, limit, order, labelIdByDatasetIdAndVersionId,oneById.getAnnotateType());
-        for(int i=0;i<labelIdByDatasetIdAndVersionId.size();i++){
-            for (int j=0;j<idByDatasetIdAndAnnotationStatus.size();j++){
-                if(idByDatasetIdAndAnnotationStatus.get(j).getId().equals(labelIdByDatasetIdAndVersionId.get(i).getVersionFileId())){
-                    idByDatasetIdAndAnnotationStatus.get(j).setLabelId(new Long[]{labelIdByDatasetIdAndVersionId.get(i).getLabelId()});
-                    idByDatasetIdAndAnnotationStatus.get(j).setPrediction(labelIdByDatasetIdAndVersionId.get(i).getPrediction());
+        List<DatasetVersionFileDTO> datasetVersionFileDTOList = datasetVersionFileMapper.getIdByDatasetIdAndAnnotationStatus(
+                datasetId, versionName, statusSet,
+                orderByName, offset, limit, order, dataFileAnnotationList, oneById.getAnnotateType());
+
+        for (int i = 0; i < dataFileAnnotationList.size(); i++) {
+            for (int j = 0; j < datasetVersionFileDTOList.size(); j++) {
+                DatasetVersionFileDTO datasetVersionFileDTO = datasetVersionFileDTOList.get(j);
+                DataFileAnnotation dataFileAnnotation = dataFileAnnotationList.get(i);
+                if (datasetVersionFileDTO.getId().equals(dataFileAnnotation.getVersionFileId())) {
+                    datasetVersionFileDTO.setLabelIdList(Arrays.asList(dataFileAnnotation.getLabelId()));
+                    datasetVersionFileDTO.setPrediction(dataFileAnnotation.getPrediction());
                 }
             }
         }
-        return idByDatasetIdAndAnnotationStatus;
+        return datasetVersionFileDTOList;
     }
 
     /**
      * 获取数据集指定版本第一张图片
      *
-     * @param datasetId           数据集id
-     * @param versionName         版本名称
-     * @param status              状态
+     * @param datasetId   数据集id
+     * @param versionName 版本名称
+     * @param status      状态
      * @return DatasetVersionFile 版本首张图片
      */
     @Override
@@ -303,7 +317,7 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
         if (StringUtils.isNotEmpty(versionName)) {
             queryWrapper.eq("version_name", versionName);
         }
-        queryWrapper.ne("status",MagicNumConstant.ONE);
+        queryWrapper.ne("status", MagicNumConstant.ONE);
         return queryWrapper;
     }
 
@@ -340,7 +354,7 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
     public List<Integer> getFileStatusListByDatasetAndVersion(Long datasetId, String versionName) {
         if (datasetId == null) {
             LogUtil.error(LogEnum.BIZ_DATASET, "datasetId isEmpty");
-            return null;
+            return new ArrayList<>();
         }
         return datasetVersionFileMapper.findFileStatusListByDatasetAndVersion(datasetId, versionName);
     }
@@ -360,24 +374,24 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
     /**
      * 判断当前数据集是否需要回滚
      *
-     * @param dataset        需要回滚的数据集
+     * @param dataset 需要回滚的数据集
      * @return boolean 数据集是否需要回退
      */
     @Override
     public boolean isNeedToRollback(Dataset dataset) {
-        LambdaQueryWrapper<DatasetVersionFile> isChanged = new LambdaQueryWrapper<DatasetVersionFile>()
+        LambdaQueryWrapper<DatasetVersionFile> isChangedQueryWrapper = new LambdaQueryWrapper<DatasetVersionFile>()
                 .eq(DatasetVersionFile::getDatasetId, dataset.getId())
                 .eq(DatasetVersionFile::getVersionName, dataset.getCurrentVersionName())
                 .eq(DatasetVersionFile::getChanged, Constant.CHANGED);
-        return baseMapper.selectCount(isChanged) > 0;
+        return baseMapper.selectCount(isChangedQueryWrapper) > 0;
     }
 
 
     /**
      * 根据当前数据集和当前版本号修改数据集是否改变
      *
-     * @param id           数据集id
-     * @param versionName  版本号
+     * @param id          数据集id
+     * @param versionName 版本号
      */
     @Override
     public void updateChanged(Long id, String versionName) {
@@ -398,7 +412,7 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
     /**
      * 获取当前数据集版本的原始文件数量
      *
-     * @param dataset    当前数据集
+     * @param dataset 当前数据集
      * @return 原始文件数量
      */
     @Override
@@ -433,6 +447,7 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
 
     /**
      * 获取增强文件数量
+     *
      * @param datasetId   数据集id
      * @param versionName 版本名称
      * @return Integer    当前版本增强文件数量
@@ -451,9 +466,10 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
      */
     @Override
     public Integer getImageCountsByDatasetIdAndVersionName(Long datasetId, String versionName) {
-        QueryWrapper<DatasetVersionFile> datasetVersionFileQueryWrapper = new QueryWrapper<>();
-        datasetVersionFileQueryWrapper.eq("dataset_id", datasetId)
-                .eq("version_name", versionName);
+        LambdaQueryWrapper<DatasetVersionFile> datasetVersionFileQueryWrapper = new LambdaQueryWrapper<>();
+        datasetVersionFileQueryWrapper
+                .eq(DatasetVersionFile::getDatasetId, datasetId)
+                .eq(DatasetVersionFile::getVersionName, versionName);
         return baseMapper.selectCount(datasetVersionFileQueryWrapper);
     }
 
@@ -461,10 +477,10 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
     /**
      * 分页获取数据集版本文件数据
      *
-     * @param offset       偏移量
-     * @param pageSize     页容量
-     * @param datasetId    数据集ID
-     * @param versionName  数据集版本名称
+     * @param offset      偏移量
+     * @param pageSize    页容量
+     * @param datasetId   数据集ID
+     * @param versionName 数据集版本名称
      * @return 数据集版本文件列表
      */
     @Override
@@ -481,12 +497,18 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
 
     /**
      * 获取数据集当前版本文件数量
-     *
-     * @param queryWrapper 查询条件
-     * @return Integer 数据集当前版本文件数量
      */
     @Override
-    public Integer getFileCountByDatasetIdAndVersion(LambdaQueryWrapper<DatasetVersionFile> queryWrapper) {
+    public Integer getFileCountByDatasetIdAndVersion(Long datasetId, String currentVersionName) {
+        LambdaQueryWrapper<DatasetVersionFile> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(DatasetVersionFile::getDatasetId, datasetId);
+        if (currentVersionName == null) {
+            queryWrapper.isNull(DatasetVersionFile::getVersionName);
+        } else {
+            queryWrapper.eq(DatasetVersionFile::getVersionName, currentVersionName);
+        }
+        queryWrapper.ne(DatasetVersionFile::getStatus, DataStatusEnum.DELETE.getValue());
+
         return baseMapper.selectCount(queryWrapper);
     }
 
@@ -499,7 +521,12 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
      */
     @Override
     public Map<Integer, Integer> getDatasetVersionFileCount(Long datasetId, String versionName) {
-        return baseMapper.getDatasetVersionFileCount(datasetId, versionName);
+        List<Pair<Integer, Long>> pairList = baseMapper.getDatasetVersionFileCount(datasetId, versionName);
+        Map<Integer, Integer> map = new HashMap<>();
+        pairList.forEach(pair -> {
+            map.put(pair.getKey(), pair.getValue().intValue());
+        });
+        return map;
     }
 
     /**
@@ -513,8 +540,7 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
         return baseMapper.selectCount(new LambdaQueryWrapper<DatasetVersionFile>() {{
             eq(DatasetVersionFile::getDatasetId, datasetVersion.getDatasetId());
             eq(DatasetVersionFile::getVersionName, datasetVersion.getVersionName());
-            ne(DatasetVersionFile::getStatus, NumberConstant.NUMBER_0);
-            ne(DatasetVersionFile::getStatus, NumberConstant.NUMBER_1);
+            notIn(DatasetVersionFile::getStatus, DataStatusEnum.ADD.getValue(), DataStatusEnum.DELETE.getValue());
         }});
     }
 
@@ -523,11 +549,11 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
      *
      * @param datasetId 数据集id
      * @param fileId    文件id
-     * @param type      数据集类型
+     * @param types     数据集类型
      * @return Integer 获取到offset
      */
     @Override
-    public Integer getOffset(Long fileId, Long datasetId, Integer[] type, Long[] labelIds) {
+    public Integer getOffset(Long fileId, Long datasetId, Integer[] types, Long[] labelIds) {
         Dataset dataset = datasetService.getOneById(datasetId);
         DatasetVersionFile datasetVersionFile = baseMapper.selectOne(new LambdaQueryWrapper<DatasetVersionFile>() {{
             eq(DatasetVersionFile::getDatasetId, dataset.getId());
@@ -538,18 +564,17 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
             }
             eq(DatasetVersionFile::getFileId, fileId);
         }});
-        if (ObjectUtil.isNull(datasetVersionFile)) {
+        if (datasetVersionFile == null) {
             return 0;
         }
         Set<Integer> annotationStatus = null;
-        if (type != null && type.length > 0) {
+        if (types != null && types.length > 0) {
             annotationStatus = new HashSet<>();
-            for (Integer in : type) {
-                annotationStatus.addAll(FileTypeEnum.getStatus(in));
+            for (Integer type : types) {
+                annotationStatus.addAll(FileTypeEnum.getStatus(type));
             }
         }
-        return baseMapper.getOffset(datasetId, annotationStatus, dataset.getCurrentVersionName(),
-                datasetVersionFile.getId(), labelIds);
+        return baseMapper.getOffset(datasetId, annotationStatus, dataset.getCurrentVersionName(), datasetVersionFile.getId(), labelIds);
     }
 
 
@@ -567,14 +592,14 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
     /**
      * 获取单个的文件版本信息
      *
-     * @param datasetId    数据集ID
-     * @param versionName  版本名称
-     * @param fileId       文件ID
+     * @param datasetId   数据集ID
+     * @param versionName 版本名称
+     * @param fileId      文件ID
      * @return 文件版本信息
      */
     @Override
     public DatasetVersionFile getDatasetVersionFile(Long datasetId, String versionName, Long fileId) {
-        return baseMapper.selectOne(new LambdaQueryWrapper<DatasetVersionFile>() {{
+        LambdaQueryWrapper<DatasetVersionFile> lambdaQueryWrapper = new LambdaQueryWrapper<DatasetVersionFile>() {{
             eq(DatasetVersionFile::getDatasetId, datasetId);
             if (StringUtils.isBlank(versionName)) {
                 isNull(DatasetVersionFile::getVersionName);
@@ -582,13 +607,14 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
                 eq(DatasetVersionFile::getVersionName, versionName);
             }
             eq(DatasetVersionFile::getFileId, fileId);
-        }});
+        }};
+        return baseMapper.selectOne(lambdaQueryWrapper);
     }
 
     /**
      * 重新标注操作更新文件状态
      *
-     * @param datasetId  数据集ID
+     * @param datasetId 数据集ID
      */
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -610,9 +636,9 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
     /**
      * 获取数据集版本文件ID
      *
-     * @param id                    数据集ID
-     * @param currentVersionName    版本名称
-     * @param fileIds               文件id
+     * @param id                 数据集ID
+     * @param currentVersionName 版本名称
+     * @param fileIds            文件id
      * @return 获取数据集版本文件
      */
     @Override
@@ -642,27 +668,21 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
 
     /**
      * 根据数据集分页条件查询文件总数量
-     *
-     * @param datasetId             数据集ID
-     * @param currentVersionName    当前版本号码
-     * @param status                状态
-     * @param labelIds               标签ID
-     * @return 文件数量
      */
     @Override
-    public int selectFileListTotalCount(Long datasetId, String currentVersionName, Integer[] status, Long[] labelIds) {
+    public int selectFileListTotalCount(Long datasetId, String currentVersionName, Set<Integer> statusList, List<Long> labelIdList) {
         Set<Integer> objects = new HashSet<>();
-        if(ArrayUtil.isEmpty(status)){
+        if (statusList.isEmpty()) {
             objects = FileTypeEnum.getStatus(NumberConstant.NUMBER_0);
         } else {
-            for(Integer sta : status){
+            for (Integer sta : statusList) {
                 objects.addAll(FileTypeEnum.getStatus(sta));
             }
         }
 
         List<Long> versionId = null;
-        if(!ArrayUtils.isEmpty(labelIds)){
-            versionId = baseMapper.findByDatasetIdAndVersionNameAndStatus(datasetId,currentVersionName, labelIds);
+        if (!labelIdList.isEmpty()) {
+            versionId = baseMapper.findByDatasetIdAndVersionNameAndStatus(datasetId, currentVersionName, labelIdList);
         }
         return datasetVersionFileMapper.selectFileListTotalCount(datasetId, currentVersionName, objects, versionId);
     }
@@ -671,8 +691,8 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
     /**
      * 根据数据集ID和版本号查询版本文件信息
      *
-     * @param datasetId     数据集ID
-     * @param versionName   版本名称
+     * @param datasetId   数据集ID
+     * @param versionName 版本名称
      * @return 数据集版本文件列表
      */
     @Override
@@ -701,27 +721,27 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
             f.setFileName(f.getFileName());
         }
         List<List<DatasetVersionFile>> splitVersionFiles = CollectionUtil.split(versionFiles, MagicNumConstant.FOUR_THOUSAND);
-        splitVersionFiles.forEach(splitVersionFile->baseMapper.insertBatch(splitVersionFile));
+        splitVersionFiles.forEach(splitVersionFile -> baseMapper.insertBatch(splitVersionFile));
     }
 
     /**
      * 文件id获取版本文件id
      *
-     * @param datasetId         数据集id
-     * @param fileIds           文件id
+     * @param datasetId 数据集id
+     * @param fileIds   文件id
      * @return List<Long>       版本文件id
      */
     @Override
-    public List<Long> getVersionFileIdsByFileIds(Long datasetId, List<Long> fileIds) {
+    public List<Long> getVersionFileIdsByFileIds(Long datasetId, Collection<Long> fileIds) {
         return baseMapper.getVersionFileIdsByFileIds(datasetId, fileIds);
     }
 
     /**
      * 获取版本文件id
      *
-     * @param datasetId         数据集id
-     * @param fileName            文件名称
-     * @param versionName       版本名称
+     * @param datasetId   数据集id
+     * @param fileName    文件名称
+     * @param versionName 版本名称
      */
     @Override
     public Long getVersionFileIdByFileName(Long datasetId, String fileName, String versionName) {
@@ -730,21 +750,20 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
 
     /**
      * 获取导入文件所需信息
-     * @param datasetId         数据集id
+     *
+     * @param datasetId 数据集id
      * @return List<FileUploadBO>
      */
     @Override
     public List<FileUploadBO> getFileUploadContent(Long datasetId, List<Long> fileIds) {
-        return baseMapper.getFileUploadContent(datasetId,fileIds);
+        return baseMapper.getFileUploadContent(datasetId, fileIds);
     }
 
     @Override
     public Long getVersionFileCountByStatusVersionAndLabelId(Long datasetId, Set<Integer> annotationStatus, String versionName, List<Long> labelIds) {
         List<Long> versionId = null;
-        if(CollectionUtil.isNotEmpty(labelIds)){
-            Long[] labelArr = new Long[labelIds.size()];
-            labelIds.toArray(labelArr);
-            versionId = baseMapper.findByDatasetIdAndVersionNameAndStatus(datasetId, versionName, labelArr);
+        if (CollectionUtil.isNotEmpty(labelIds)) {
+            versionId = baseMapper.findByDatasetIdAndVersionNameAndStatus(datasetId, versionName, labelIds);
             if (CollectionUtil.isEmpty(versionId)) {
                 return 0L;
             }
@@ -756,8 +775,8 @@ public class DatasetVersionFileServiceImpl extends ServiceImpl<DatasetVersionFil
     /**
      * 删除旧标注信息
      *
-     * @param datasetId         数据集id
-     * @param fileId            文件id
+     * @param datasetId 数据集id
+     * @param fileId    文件id
      */
     @Override
     public void deleteByFileId(Long datasetId, Long fileId) {

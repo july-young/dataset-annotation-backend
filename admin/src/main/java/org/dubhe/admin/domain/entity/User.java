@@ -81,6 +81,7 @@ public class User extends BaseEntity implements Serializable {
     private Long avatarId;
 
     @TableField(value = "deleted",fill = FieldFill.INSERT)
+    @TableLogic
     private Boolean deleted = false;
 
     @TableField(exist = false)

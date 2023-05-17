@@ -1,19 +1,4 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
+
 
 package org.dubhe.data.domain.vo;
 
@@ -44,7 +29,7 @@ public class FileQueryCriteriaVO {
 
     @ApiModelProperty(value = "数据集文件状态")
     @Query(type = Query.Type.IN)
-    private Integer[] status;
+    private List<Integer> statusList;
 
     @ApiModelProperty(value = "数据集文件名称")
     @Query(type = Query.Type.LIKE)
@@ -72,13 +57,13 @@ public class FileQueryCriteriaVO {
 
     @ApiModelProperty(value = "数据集标签ID")
     @Query(type = Query.Type.IN, propName = "label_id")
-    private Long[] labelId;
+    private List<Long> labelIdList;
 
     @ApiModelProperty(value = "标注状态")
-    private Integer[] annotateStatus;
+    private List<Integer> annotateStatusList;
 
     @ApiModelProperty(value = "标注方式")
-    private Integer[] annotateType;
+    private List<Integer> annotateTypeList;
 
     /**
      * 搜索内容

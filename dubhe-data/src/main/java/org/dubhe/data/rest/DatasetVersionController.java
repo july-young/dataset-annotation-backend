@@ -1,31 +1,16 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
-
 package org.dubhe.data.rest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.dubhe.biz.base.constant.Permissions;
 import org.dubhe.biz.base.vo.DataResponseBody;
+import org.dubhe.biz.db.utils.PageDTO;
 import org.dubhe.data.constant.Constant;
 import org.dubhe.data.domain.dto.ConversionCreateDTO;
 import org.dubhe.data.domain.dto.DatasetVersionCreateDTO;
 import org.dubhe.data.domain.dto.DatasetVersionDeleteDTO;
 import org.dubhe.data.domain.dto.DatasetVersionQueryCriteriaDTO;
+import org.dubhe.data.domain.vo.DatasetVersionVO;
 import org.dubhe.data.service.DatasetVersionService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -33,10 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
-/**
- * @description 数据集版本管理
- * @date 2020-05-14
- */
 @Api(tags = "数据处理：数据集版本管理")
 @RestController
 @RequestMapping(Constant.MODULE_URL_PREFIX + "/datasets/versions")
@@ -50,7 +31,8 @@ public class DatasetVersionController {
     @PreAuthorize(Permissions.DATA)
     public DataResponseBody publish(@Validated(DatasetVersionCreateDTO.Create.class)
                                     @RequestBody DatasetVersionCreateDTO datasetVersionCreateDTO) {
-        return new DataResponseBody(datasetVersionService.publish(datasetVersionCreateDTO));
+        String publish = datasetVersionService.publish(datasetVersionCreateDTO);
+        return new DataResponseBody(publish);
     }
 
     @ApiOperation("数据集版本url")
@@ -63,8 +45,9 @@ public class DatasetVersionController {
     @ApiOperation("数据集版本列表")
     @GetMapping
     @PreAuthorize(Permissions.DATA)
-    public DataResponseBody datasetVersionList(@Validated DatasetVersionQueryCriteriaDTO datasetVersionQueryCriteria) {
-        return new DataResponseBody(datasetVersionService.getList(datasetVersionQueryCriteria));
+    public DataResponseBody<PageDTO<DatasetVersionVO>> datasetVersionList(@Validated DatasetVersionQueryCriteriaDTO datasetVersionQueryCriteria) {
+        PageDTO<DatasetVersionVO> pageDTO = datasetVersionService.page(datasetVersionQueryCriteria);
+        return new DataResponseBody(pageDTO);
     }
 
     @ApiOperation("数据集版本切换")

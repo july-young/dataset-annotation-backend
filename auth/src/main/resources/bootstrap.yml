@@ -1,7 +1,6 @@
 server:
   port: 7801
 
-
 spring:
   application:
     name: auth

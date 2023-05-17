@@ -29,15 +29,6 @@ spring:
           data-id: dubhe-data-task.yaml
           group: dubhe
           refresh: true
-        shared-configs[4]:
-          # 配置1
-          data-id: common-k8s.yaml
-          group: dubhe
-          refresh: true
-        shared-configs[5]:
-          data-id: kubeconfig.yaml
-          group: dubhe
-          refresh: true
       discovery:
         enabled: true
         namespace: dataset-annotation

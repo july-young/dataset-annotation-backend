@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
 package org.dubhe.admin.rest;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -29,6 +13,7 @@ import org.dubhe.biz.base.constant.Permissions;
 import org.dubhe.biz.base.context.UserContext;
 import org.dubhe.biz.base.dto.UserDTO;
 import org.dubhe.biz.base.vo.DataResponseBody;
+import org.dubhe.biz.db.utils.PageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -62,22 +47,25 @@ public class UserController {
 
     @ApiOperation("查询用户")
     @GetMapping
-    public DataResponseBody getUsers(UserQueryDTO criteria, Page page) {
-        return new DataResponseBody(userService.queryAll(criteria, page));
+    public DataResponseBody getUsers(UserQueryDTO queryDTO, Page page) {
+        PageDTO<UserDTO> userDTOPageDTO = userService.queryAll(queryDTO, page);
+        return new DataResponseBody(userDTOPageDTO);
     }
 
     @ApiOperation("新增用户")
     @PostMapping
     @PreAuthorize(Permissions.USER_CREATE)
     public DataResponseBody create(@Valid @RequestBody UserCreateDTO userCreateDTO) {
-        return new DataResponseBody(userService.create(userCreateDTO));
+        UserDTO userDTO = userService.create(userCreateDTO);
+        return new DataResponseBody(userDTO);
     }
 
     @ApiOperation("修改用户")
     @PutMapping
     @PreAuthorize(Permissions.USER_EDIT)
-    public DataResponseBody update(@Valid @RequestBody UserUpdateDTO resources) {
-        return new DataResponseBody(userService.update(resources));
+    public DataResponseBody update(@Valid @RequestBody UserUpdateDTO userUpdateDTO) {
+        UserDTO userDTO = userService.update(userUpdateDTO);
+        return new DataResponseBody(userDTO);
     }
 
     @ApiOperation("删除用户")
@@ -88,30 +76,21 @@ public class UserController {
         return new DataResponseBody();
     }
 
-    @ApiOperation("根据用户ID查询用户配置")
-    @GetMapping(value = "/getUserConfig")
-    public DataResponseBody getUserConfig(@RequestParam(value = "userId") Long userId) {
-        return new DataResponseBody(userService.findUserConfig(userId));
-    }
-
-
     /**
      * 此接口提供给Auth模块获取用户信息使用
      * 因Auth获取用户信息在登录时是未登录状态，请不要在此添加权限校验
-     * @param username
-     * @return
      */
     @ApiOperation("根据用户名称查找用户")
     @GetMapping(value = "/findUserByUsername")
     public DataResponseBody<UserContext> findUserByUsername(@RequestParam(value = "username") String username) {
-        DataResponseBody<UserContext> userContextDataResponseBody = userService.findUserByUsername(username);
-        return userContextDataResponseBody;
+        UserContext userContext = userService.findUserByUsername(username);
+        return new DataResponseBody(userContext);
     }
 
 
     @ApiOperation("根据用户ID查询用户信息(服务内部访问)")
     @GetMapping(value = "/findById")
-    public DataResponseBody<UserDTO> getUsers(@RequestParam(value = "userId") Long userId) {
+    public DataResponseBody<UserDTO> findById(@RequestParam(value = "userId") Long userId) {
         return new DataResponseBody(userService.findById(userId));
     }
 
@@ -127,9 +106,4 @@ public class UserController {
         return new DataResponseBody(userService.getUserList(ids));
     }
 
-    @ApiOperation("见微平台专用")
-    @GetMapping("/decryptVisUser")
-    public DataResponseBody<String> encryptVisUser(Authentication authentication) {
-        return new DataResponseBody<>(userService.encryptUserForVis(authentication));
-    }
 }

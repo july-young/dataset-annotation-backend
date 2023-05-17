@@ -1,19 +1,4 @@
-/**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================
- */
+
 package org.dubhe.admin.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
@@ -31,6 +16,7 @@ import org.dubhe.biz.base.context.UserContext;
 import org.dubhe.biz.base.exception.BusinessException;
 import org.dubhe.biz.base.service.UserContextService;
 import org.dubhe.biz.base.vo.DataResponseBody;
+import org.dubhe.biz.db.utils.PageDTO;
 import org.dubhe.biz.db.utils.PageUtil;
 import org.dubhe.biz.file.api.FileStoreApi;
 import org.dubhe.biz.file.api.impl.ShellFileStoreApiImpl;
@@ -126,12 +112,9 @@ public class RecycleTaskServiceImpl implements RecycleTaskService {
 
     /**
      * 查询回收任务列表
-     *
-     * @param recycleTaskQueryDTO 查询任务列表条件
-     * @return Map<String, Object> 可回收任务列表
      */
     @Override
-    public Map<String, Object> getRecycleTasks(RecycleTaskQueryDTO recycleTaskQueryDTO) {
+    public PageDTO<Recycle> getRecycleTasks(RecycleTaskQueryDTO recycleTaskQueryDTO) {
         //获取当前用户信息
         Long curUserId = userContextService.getCurUserId();
         Page page = recycleTaskQueryDTO.toPage();
@@ -150,7 +133,6 @@ public class RecycleTaskServiceImpl implements RecycleTaskService {
     /**
      *  获取垃圾回收任务列表
      *  资源回收单次执行任务数量限制（默认10000）
-     * @return List<RecycleTask> 垃圾回收任务列表
      */
     @Override
     public List<Recycle> getRecycleTaskList() {
@@ -226,9 +208,6 @@ public class RecycleTaskServiceImpl implements RecycleTaskService {
     /**
      * 默认回收
      * (无统一事务操作)
-     *
-     * @param recycle       回收任务
-     * @param userId            用户ID
      */
     private void defaultRecycle(Recycle recycle, long userId) {
         try {
