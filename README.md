@@ -17,8 +17,8 @@ dubhe-data-task <br>
 
 ### 转移数据集拥有人
 ```sql
-UPDATE `data_dataset` SET origin_user_id= 3 WHERE id=37;
-UPDATE `data_dataset_version` SET origin_user_id= 3 WHERE id=37;
-UPDATE `data_file_1` SET origin_user_id= 3 WHERE dataset_id = 37;
+UPDATE `data_dataset` SET origin_user_id= 1 WHERE id= 2;
+UPDATE `data_dataset_version` SET origin_user_id= 1 WHERE id= 2;
+UPDATE `data_file_1` SET origin_user_id= 1 WHERE dataset_id = 2;
 ```
 
