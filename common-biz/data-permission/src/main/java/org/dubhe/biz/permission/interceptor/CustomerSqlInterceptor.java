@@ -26,7 +26,7 @@ import java.util.Properties;
 
 /**
  * @description mybatis拦截器
- * @date 2020-11-25
+
  */
 @Component
 @Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class})})

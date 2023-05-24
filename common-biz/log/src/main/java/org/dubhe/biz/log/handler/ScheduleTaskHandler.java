@@ -7,7 +7,7 @@ import org.dubhe.biz.log.utils.LogUtil;
 
 /**
  * @description 定时任务处理器, 主要做日志标识
- * @date 2020-08-13
+
  */
 public class ScheduleTaskHandler {
 

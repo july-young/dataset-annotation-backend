@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @description 手动标注中状态类
- * @date 2020-08-27
+
  */
 @Component
 public class ManualAnnotationState extends AbstractDataState {

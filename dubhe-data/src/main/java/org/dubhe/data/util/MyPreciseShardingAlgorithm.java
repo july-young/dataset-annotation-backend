@@ -16,7 +16,7 @@ import java.util.Set;
 
 /**
  * @description 分标策略配置
- * @date 2020-09-21
+
  */
 public class MyPreciseShardingAlgorithm implements PreciseShardingAlgorithm<Long>{
 

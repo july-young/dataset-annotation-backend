@@ -12,7 +12,7 @@ import java.util.Set;
 
 /**
  * @description 角色修改 DTO
- * @date 2020-06-29
+
  */
 @Data
 public class RoleUpdateDTO implements Serializable {

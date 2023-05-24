@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @description 手动标注中状态类
- * @date 2020-09-03
+
  */
 @Component
 public class ManualAnnotationFileState extends AbstractFileState {

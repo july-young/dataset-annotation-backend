@@ -30,7 +30,7 @@ import java.util.zip.ZipOutputStream;
 /**
  * @description NFS Util
  * ！！！注意： 使用NFSFile 对象 业务上自行需要关闭 NFS 对象
- * @date 2020-05-12
+
  */
 @Deprecated
 @Component

@@ -17,7 +17,7 @@ import java.sql.Timestamp;
 
 /**
  * @description 字典详情实体
- * @date 2020-06-01
+
  */
 @Data
 @TableName("dict_detail")

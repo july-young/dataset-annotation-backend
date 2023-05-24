@@ -10,7 +10,7 @@ import org.dubhe.data.domain.entity.Task;
 
 /**
  * @description 标注任务信息 Mapper 接口
- * @date 2020-04-10
+
  */
 public interface TaskMapper extends BaseMapper<Task> {
 

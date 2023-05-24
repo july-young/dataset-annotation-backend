@@ -5,7 +5,7 @@ import lombok.Getter;
 
 /**
  * @description 标签组数据类型
- * @date 2020-12-11
+
  */
 @Getter
 public enum LabelGroupTypeEnum {

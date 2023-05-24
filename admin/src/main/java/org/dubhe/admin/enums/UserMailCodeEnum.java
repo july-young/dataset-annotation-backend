@@ -4,7 +4,7 @@ package org.dubhe.admin.enums;
 
 /**
  * @description 邮箱code 类型
- * @date 2020-06-01
+
  */
 public enum UserMailCodeEnum {
     /**

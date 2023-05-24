@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * @description 数据集版本文件数据
- * @date 2020-07-09
+
  */
 @Data
 public class DatasetVersionFileDTO {

@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 /**
  * @description 用户登录dto
- * @date 2020-06-01
+
  */
 @Getter
 @Setter

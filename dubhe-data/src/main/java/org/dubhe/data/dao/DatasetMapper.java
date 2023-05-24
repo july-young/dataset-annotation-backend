@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * @description 数据集管理 Mapper 接口
- * @date 2020-04-10
+
  */
 @DataPermission(ignoresMethod = {"insert", "selectById", "selectCountByPublic", "selectList", "dataVersionListVO"})
 public interface DatasetMapper extends BaseMapper<Dataset> {

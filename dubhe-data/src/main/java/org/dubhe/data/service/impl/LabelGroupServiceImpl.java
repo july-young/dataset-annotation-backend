@@ -63,7 +63,7 @@ import static org.dubhe.data.constant.Constant.SORT_ASC;
 
 /**
  * @description 标签组 服务实现类
- * @date 2020-09-22
+
  */
 @Service
 public class LabelGroupServiceImpl extends ServiceImpl<LabelGroupMapper, LabelGroup> implements LabelGroupService {

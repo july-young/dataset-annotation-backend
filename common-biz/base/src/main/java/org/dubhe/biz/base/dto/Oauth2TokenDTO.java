@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 /**
  * @description Oauth2获取Token返回信息封装
- * @date 2020-05-08
+
  */
 @Data
 @EqualsAndHashCode(callSuper = false)

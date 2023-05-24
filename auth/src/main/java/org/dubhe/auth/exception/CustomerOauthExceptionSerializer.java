@@ -11,7 +11,7 @@ import java.io.IOException;
 
 /**
  * @description 序列化异常处理类
- * @date 2020-12-21
+
  */
 public class CustomerOauthExceptionSerializer extends StdSerializer<CustomerOauthException> {
 

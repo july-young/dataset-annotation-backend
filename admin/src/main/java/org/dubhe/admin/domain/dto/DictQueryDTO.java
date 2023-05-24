@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 /**
  * @description  公共查询类
- * @date 2020-05-10
+
  */
 @Data
 public class DictQueryDTO implements Serializable {

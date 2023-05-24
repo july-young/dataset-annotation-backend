@@ -6,7 +6,7 @@ import lombok.Getter;
 
 /**
  * @description 日志类型枚举类
- * @date 2020-06-23
+
  */
 @Getter
 public enum LogEnum {

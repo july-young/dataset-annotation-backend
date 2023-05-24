@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 /**
  * @description 标签DTO
- * @date 2020-07-09
+
  */
 @Data
 public class LabelDTO  extends Label implements Serializable {

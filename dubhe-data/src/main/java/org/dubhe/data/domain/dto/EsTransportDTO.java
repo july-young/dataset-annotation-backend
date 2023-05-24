@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 
 /**
  * @description ES数据同步DTO
- * @date 2020-03-24
+
  */
 @Data
 public class EsTransportDTO {

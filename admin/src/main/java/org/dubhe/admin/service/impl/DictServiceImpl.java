@@ -29,7 +29,7 @@ import java.util.*;
 
 /**
  * @description 字典服务 实现类
- * @date 2020-06-01
+
  */
 @Service
 public class DictServiceImpl implements DictService {

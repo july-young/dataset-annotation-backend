@@ -11,7 +11,7 @@ import java.util.*;
 
 /**
  * @description 用于映射前端文件筛选与后端文件状态
- * @date 2020-05-06
+
  */
 @Getter
 public enum FileTypeEnum {

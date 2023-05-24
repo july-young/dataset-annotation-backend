@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 /**
  * @description 标签组列表DTO
- * @date 2020-12-11
+
  */
 @Data
 public class LabelGroupQueryDTO implements Serializable {

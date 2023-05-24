@@ -2,7 +2,7 @@ package org.dubhe.data.machine.constant;
 
 /**
  * @description 状态机事件常量
- * @date 2020-08-27
+
  */
 public class DataStateMachineConstant {
 

@@ -10,7 +10,7 @@ import java.util.Set;
 
 /**
  * @description 状态判断设置类
- * @date 2020-09-24
+
  */
 @Component
 public class StateIdentifySetting {

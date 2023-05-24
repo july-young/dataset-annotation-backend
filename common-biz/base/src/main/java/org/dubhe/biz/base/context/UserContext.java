@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @description 用户上下文（当前登录用户）
  *  可根据需要自定义改造
- * @date 2020-12-07
+
  */
 @Data
 public class UserContext  implements Serializable {

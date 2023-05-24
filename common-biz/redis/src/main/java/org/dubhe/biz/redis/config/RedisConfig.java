@@ -35,7 +35,7 @@ import java.util.Map;
 
 /**
  * @description  redis配置类
- * @date 2020-03-25
+
  */
 @Slf4j
 @Configuration

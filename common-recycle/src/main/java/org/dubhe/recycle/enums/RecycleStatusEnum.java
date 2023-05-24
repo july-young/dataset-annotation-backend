@@ -3,7 +3,7 @@ package org.dubhe.recycle.enums;
 
 /**
  * @description 垃圾回收状态
- * @date 2020-09-17
+
  */
 public enum RecycleStatusEnum {
 

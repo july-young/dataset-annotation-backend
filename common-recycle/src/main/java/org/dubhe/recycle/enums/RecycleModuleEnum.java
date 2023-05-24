@@ -10,7 +10,7 @@ import java.util.Map;
 import static org.dubhe.biz.base.constant.ApplicationNameConst.*;
 /**
  * @description 垃圾回收模块枚举
- * @date 2020-09-17
+
  */
 public enum RecycleModuleEnum {
 

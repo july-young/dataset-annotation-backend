@@ -10,7 +10,7 @@ import org.mapstruct.ReportingPolicy;
 
 /**
  * @description 文件数据转换
- * @date 2020-04-17
+
  */
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface FileConvert extends BaseConvert<FileVO, File> {

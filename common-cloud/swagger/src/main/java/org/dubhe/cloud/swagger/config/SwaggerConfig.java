@@ -35,7 +35,7 @@ import static springfox.documentation.schema.AlternateTypeRules.newRule;
 
 /**
  * @description  api页面 /swagger-ui.html
- * @date 2020-03-25
+
  */
 @Configuration
 @EnableSwagger2

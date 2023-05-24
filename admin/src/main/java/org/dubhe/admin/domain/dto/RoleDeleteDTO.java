@@ -10,7 +10,7 @@ import java.util.Set;
 
 /**
  * @description 角色删除 dto
- * @date 2020-06-29
+
  */
 @Data
 public class RoleDeleteDTO implements Serializable {

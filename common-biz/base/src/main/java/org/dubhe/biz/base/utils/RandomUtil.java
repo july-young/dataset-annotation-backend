@@ -5,7 +5,7 @@ package org.dubhe.biz.base.utils;
 
 /**
  * @description  随机数工具类
- * @date 2020-06-01
+
  */
 public class RandomUtil {
 

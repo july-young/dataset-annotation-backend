@@ -20,7 +20,7 @@ import java.io.IOException;
 
 /**
  * @description 异常捕获并通过CustomerOauthException处理
- * @date 2020-12-21
+
  */
 @Component
 public class CustomerOauthWebResponseExceptionTranslator implements WebResponseExceptionTranslator {

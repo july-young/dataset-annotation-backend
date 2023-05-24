@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 /**
  * @description sql语句转换的工具类
- * @date 2020-11-25
+
  */
 public class SqlUtil {
 

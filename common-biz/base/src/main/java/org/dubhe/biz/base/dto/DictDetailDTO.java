@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 
 /**
  * @description 字典详情DTO
- * @date 2020-06-01
+
  */
 @Data
 public class DictDetailDTO implements Serializable {

@@ -5,7 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 /**
  * @description 权限封装
- * @date 2020-10-29
+
  */
 public class GrantedAuthorityImpl implements GrantedAuthority {
 

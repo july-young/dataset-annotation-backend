@@ -24,7 +24,7 @@ import static org.dubhe.biz.base.constant.MagicNumConstant.ONE_THOUSAND;
 
 /**
  * @description HttpClient配置类
- * @date 2020-12-28
+
  */
 @Configuration
 @AutoConfigureBefore(FeignAutoConfiguration.class)

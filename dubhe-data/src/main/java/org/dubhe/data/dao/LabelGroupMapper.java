@@ -12,7 +12,7 @@ import org.dubhe.data.domain.entity.LabelGroup;
 
 /**
  * @description 标签组管理 Mapper 接口
- * @date 2020-09-22
+
  */
 @DataPermission(ignoresMethod = {"insert","getLabelGroupByDataId","selectById"})
 public interface LabelGroupMapper extends BaseMapper<LabelGroup> {

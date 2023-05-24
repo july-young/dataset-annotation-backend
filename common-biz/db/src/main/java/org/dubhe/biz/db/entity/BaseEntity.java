@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 
 /**
  * @description  Entity基础类
- * @date 2020-11-26
+
  */
 @Data
 public class BaseEntity implements Serializable {

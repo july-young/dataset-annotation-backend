@@ -7,7 +7,7 @@ import org.dubhe.biz.base.constant.MagicNumConstant;
 
 /**
  * @description 计算工具类
- * @date 2020-06-04
+
  */
 public class MathUtils {
 

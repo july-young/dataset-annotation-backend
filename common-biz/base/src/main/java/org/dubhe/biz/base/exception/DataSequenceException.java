@@ -7,7 +7,7 @@ import org.dubhe.biz.base.exception.BusinessException;
 
 /**
  * @description 获取序列异常
- * @date 2020-09-23
+
  */
 @Getter
 public class DataSequenceException extends BusinessException {

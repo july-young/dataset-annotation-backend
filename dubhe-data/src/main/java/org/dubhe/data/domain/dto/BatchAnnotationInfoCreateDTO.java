@@ -14,7 +14,7 @@ import java.util.Map;
 
 /**
  * @description 批量自动标注
- * @date 2020-04-21
+
  */
 @Data
 @AllArgsConstructor

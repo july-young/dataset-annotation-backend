@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 /**
  * @description 统一的公共响应体
- * @date 2020-03-16
+
  */
 @Data
 public class DataResponseBody<T> implements Serializable {

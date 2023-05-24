@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @description 系统登录 控制器
- * @date 2020-06-01
+
  */
 @Api(tags = "系统登录")
 @RestController

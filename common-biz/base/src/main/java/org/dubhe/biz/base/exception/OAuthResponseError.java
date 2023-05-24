@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 
 /**
  * @description OAuth2 授权自定义异常
- * @date 2020-11-18
+
  */
 public class OAuthResponseError extends RuntimeException{
 

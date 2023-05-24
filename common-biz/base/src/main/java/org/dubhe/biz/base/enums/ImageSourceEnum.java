@@ -3,7 +3,7 @@ package org.dubhe.biz.base.enums;
 
 /**
  * @description 镜像来源枚举类
- * @date 2020-07-15
+
  */
 public enum ImageSourceEnum {
     MINE(0, "我的镜像"),

@@ -7,7 +7,7 @@ import org.dubhe.biz.base.exception.ErrorCode;
 
 /**
  * @description 通用异常code
- * @date 2020-11-26
+
  */
 @Getter
 public enum BaseErrorCodeEnum implements ErrorCode {

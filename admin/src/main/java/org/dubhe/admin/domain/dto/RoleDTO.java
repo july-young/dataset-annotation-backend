@@ -11,7 +11,7 @@ import java.util.Set;
 
 /**
  * @description 角色的实体类
- * @date 2020-06-01
+
  */
 @Data
 public class RoleDTO implements Serializable {

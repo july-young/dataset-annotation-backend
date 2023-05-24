@@ -4,7 +4,7 @@ package org.dubhe.biz.base.enums;
 
 /**
  * @description 是否开关枚举
- * @date 2020-06-01
+
  */
 public enum SwitchEnum {
     /**

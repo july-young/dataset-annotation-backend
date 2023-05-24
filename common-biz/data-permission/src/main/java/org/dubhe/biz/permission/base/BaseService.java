@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 /**
  * @description 服务层基础数据公共方法类
- * @date 2020-03-27
+
  */
 public class BaseService {
 

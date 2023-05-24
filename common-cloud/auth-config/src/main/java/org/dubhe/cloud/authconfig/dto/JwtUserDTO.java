@@ -9,7 +9,7 @@ import java.util.Collection;
 
 /**
  * @description 安全用户模型
- * @date 2020-10-29
+
  */
 public class JwtUserDTO <U extends UserContext> implements UserDetails{
 

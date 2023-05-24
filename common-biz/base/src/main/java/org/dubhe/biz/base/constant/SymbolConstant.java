@@ -4,7 +4,7 @@ package org.dubhe.biz.base.constant;
 
 /**
  * @description 符号常量
- * @date 2020-5-29
+
  */
 public class SymbolConstant {
 	public static final String SLASH = "/";

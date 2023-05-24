@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * @description mybatis plus拦截器
- * @date 2020-11-26
+
  */
 @EnableTransactionManagement
 @Configuration

@@ -4,7 +4,7 @@ package org.dubhe.biz.base.constant;
 
 /**
  * @description 常用常量类
- * @date 2020-05-14
+
  */
 public final class MagicNumConstant {
 

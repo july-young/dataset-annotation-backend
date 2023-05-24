@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * @description 角色请求实体DTO
- * @date 2020-06-01
+
  */
 @Data
 public class RoleQueryDTO implements Serializable {

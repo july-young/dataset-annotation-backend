@@ -6,7 +6,7 @@ import lombok.Getter;
 
 /**
  * @description 资源回收枚举类
- * @date 2020-10-10
+
  */
 @Getter
 public enum RecycleResourceEnum {

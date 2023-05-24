@@ -3,7 +3,7 @@ package org.dubhe.biz.base.enums;
 
 /**
  * @description 算法状态枚举
- * @date 2020-08-19
+
  */
 public enum AlgorithmStatusEnum {
 

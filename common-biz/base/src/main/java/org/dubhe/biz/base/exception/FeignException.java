@@ -8,7 +8,7 @@ import org.dubhe.biz.base.vo.DataResponseBody;
 
 /**
  * @description 远程调用异常
- * @date 2020-11-26
+
  */
 @Getter
 public class FeignException extends RuntimeException {

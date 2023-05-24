@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * @description 网关异常处理器
  * 参考org.springframework.boot.autoconfigure.web.reactive.error.DefaultErrorWebExceptionHandler
- * @date 2020-12-23
+
  */
 public class JsonExceptionHandler implements ErrorWebExceptionHandler {
 

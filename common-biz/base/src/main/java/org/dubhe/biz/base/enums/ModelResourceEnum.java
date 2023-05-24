@@ -6,7 +6,7 @@ import lombok.Getter;
 
 /**
  * @description 模型资源枚举类
- * @date 2020-11-19
+
  */
 @Getter
 public enum ModelResourceEnum {

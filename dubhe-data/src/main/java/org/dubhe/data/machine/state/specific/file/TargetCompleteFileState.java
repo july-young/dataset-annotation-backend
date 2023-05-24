@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @description 目标追踪完成类
- * @date 2020-08-27
+
  */
 @Component
 public class TargetCompleteFileState extends AbstractFileState {

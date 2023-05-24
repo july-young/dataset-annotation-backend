@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * @description 用户信息
- * @date 2020-06-29
+
  */
 @Data
 public class UserDTO implements Serializable {

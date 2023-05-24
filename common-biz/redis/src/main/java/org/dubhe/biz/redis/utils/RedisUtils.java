@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @description redis工具类
- * @date 2020-03-13
+
  */
 @Component
 @SuppressWarnings({"unchecked", "all"})

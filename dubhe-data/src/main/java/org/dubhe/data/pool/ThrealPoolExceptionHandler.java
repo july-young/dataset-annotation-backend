@@ -7,7 +7,7 @@ import org.dubhe.biz.log.utils.LogUtil;
 
 /**
  * @description 异常线程池
- * @date 2020-04-10
+
  */
 public class ThrealPoolExceptionHandler implements Thread.UncaughtExceptionHandler {
 

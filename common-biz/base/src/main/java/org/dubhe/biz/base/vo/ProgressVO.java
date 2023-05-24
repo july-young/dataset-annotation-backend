@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 /**
  * @description 数据集状态
- * @date 2020-04-10
+
  */
 @NoArgsConstructor
 @AllArgsConstructor

@@ -3,7 +3,7 @@ package org.dubhe.biz.base.annotation;
 
 /**
  * @description  数据权限注解
- * @date 2020-11-26
+
  */
 import java.lang.annotation.*;
 

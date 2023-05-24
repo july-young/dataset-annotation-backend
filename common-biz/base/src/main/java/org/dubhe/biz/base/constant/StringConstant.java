@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 /**
  * @description 字符串constant
- * @date 2020-05-14
+
  */
 public final class StringConstant {
 

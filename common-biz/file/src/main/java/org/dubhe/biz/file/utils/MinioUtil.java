@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 /**
  * @description Minio工具类
- * @date 2020-05-09
+
  */
 @Service
 public class MinioUtil {

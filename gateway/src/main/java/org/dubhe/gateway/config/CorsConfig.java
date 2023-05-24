@@ -9,7 +9,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  *@description 跨域配置
- *@date 2020-12-15
+
  */
 @Configuration
 public class CorsConfig {

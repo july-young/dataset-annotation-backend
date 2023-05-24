@@ -7,7 +7,7 @@ import org.dubhe.biz.base.exception.BusinessException;
 
 /**
  * @description NFS utils 工具异常
- * @date 2020-06-15
+
  */
 @Getter
 public class NfsBizException extends BusinessException {

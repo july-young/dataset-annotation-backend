@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * @description 数据处理模块服务启动类
- * @date 2020-12-16
+
  */
 @SpringBootApplication(scanBasePackages = "org.dubhe",exclude = ElasticsearchDataAutoConfiguration.class )
 @MapperScan(basePackages = {"org.dubhe.**.dao"})

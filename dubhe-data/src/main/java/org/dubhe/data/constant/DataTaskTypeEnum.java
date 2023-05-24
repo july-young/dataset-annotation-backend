@@ -6,7 +6,7 @@ import lombok.Getter;
 
 /**
  * @description  数据集任务类型
- * @date 2020-08-27
+
  */
 @Getter
 public enum DataTaskTypeEnum {

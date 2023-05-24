@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * @description minIo
- * @date 2020-05-09
+
  */
 @Service
 public class MinioStoreServiceImpl implements IStoreService {

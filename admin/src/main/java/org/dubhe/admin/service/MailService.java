@@ -6,7 +6,7 @@ import javax.mail.MessagingException;
 
 /**
  * @description 邮箱服务 Service
- * @date 2020-06-01
+
  */
 public interface MailService {
 

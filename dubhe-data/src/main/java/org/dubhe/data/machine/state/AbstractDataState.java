@@ -4,7 +4,7 @@ import org.dubhe.data.domain.entity.Dataset;
 
 /**
  * @description 数据集状态类
- * @date 2020-08-27
+
  */
 public abstract class AbstractDataState {
 

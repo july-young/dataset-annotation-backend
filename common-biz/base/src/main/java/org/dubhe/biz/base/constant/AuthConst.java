@@ -3,7 +3,7 @@ package org.dubhe.biz.base.constant;
 
 /**
  * @description 授权常量类
- * @date 2020-11-05
+
  */
 public class AuthConst {
     private AuthConst() {

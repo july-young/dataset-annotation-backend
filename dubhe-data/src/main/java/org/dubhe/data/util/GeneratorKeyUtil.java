@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @description 生成ID工具类
- * @date 2020-09-23
+
  */
 @Component
 public class GeneratorKeyUtil {

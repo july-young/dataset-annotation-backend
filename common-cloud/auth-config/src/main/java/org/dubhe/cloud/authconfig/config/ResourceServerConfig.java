@@ -27,7 +27,7 @@ import javax.sql.DataSource;
 
 /**
  * @description 资源服务器鉴权配置
- * @date 2020-11-05
+
  */
 @Configuration
 @EnableResourceServer

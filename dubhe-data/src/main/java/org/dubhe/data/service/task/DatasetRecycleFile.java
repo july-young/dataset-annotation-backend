@@ -27,7 +27,7 @@ import static org.dubhe.data.constant.Constant.LIMIT_NUMBER;
 
 /**
  * @description 数据集文件删除类
- * @date 2020-10-09
+
  */
 @RefreshScope
 @Component(value = "datasetRecycleFile")

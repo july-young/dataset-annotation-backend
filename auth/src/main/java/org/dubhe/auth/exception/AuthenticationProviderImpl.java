@@ -19,7 +19,7 @@ import java.util.Objects;
 
 /**
  * @description 抛出自定义中文错误信息
- * @date 2020-12-21
+
  */
 @Service
 public class AuthenticationProviderImpl implements AuthenticationProvider {

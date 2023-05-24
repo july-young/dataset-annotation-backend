@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * @description 字典新增DTO
- * @date 2020-06-01
+
  */
 @Data
 public class DictUpdateDTO implements Serializable {

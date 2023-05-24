@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @description 权限常量
- * @date 2020-05-25
+
  */
 @Component
 @Data

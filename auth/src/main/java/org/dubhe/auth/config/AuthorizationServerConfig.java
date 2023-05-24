@@ -19,7 +19,7 @@ import javax.sql.DataSource;
 
 /**
  * @description  授权配置
- * @date 2020-11-05
+
  */
 @EnableAuthorizationServer
 @Configuration

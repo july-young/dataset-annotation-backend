@@ -15,7 +15,7 @@ import java.util.Date;
 
 /**
  * @description 数据集版本Vo
- * @date 2020-05-21
+
  */
 @Data
 public class DatasetVersionVO implements Serializable {

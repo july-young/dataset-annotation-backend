@@ -7,7 +7,7 @@ import lombok.Data;
 
 /**
  * @description pod的实体类
- * @date 2020-06-03
+
  */
 @Data
 public class PodDTO {

@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * @description 转换回调信息
- * @date 2020-07-02
+
  */
 @Data
 public class ConversionCreateDTO implements Serializable {

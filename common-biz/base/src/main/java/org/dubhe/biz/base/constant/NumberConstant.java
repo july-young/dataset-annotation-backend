@@ -4,7 +4,7 @@ package org.dubhe.biz.base.constant;
 
 /**
  * @description 数字常量
- * @date 2020-06-09
+
  */
 public class NumberConstant {
 

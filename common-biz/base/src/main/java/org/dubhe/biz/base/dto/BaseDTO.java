@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 
 /**
  * @description  DTO基础类
- * @date 2020-03-15
+
  */
 @Getter
 @Setter

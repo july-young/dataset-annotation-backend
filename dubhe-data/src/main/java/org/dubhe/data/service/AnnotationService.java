@@ -16,7 +16,7 @@ import java.util.Map;
 
 /**
  * @description 标注信息服务类
- * @date 2020-07-16
+
  */
 public interface AnnotationService {
 

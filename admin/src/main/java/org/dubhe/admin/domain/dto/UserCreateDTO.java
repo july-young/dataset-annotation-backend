@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * @description 用户创建DTO
- * @date 2020-06-29
+
  */
 @Data
 public class UserCreateDTO implements Serializable {

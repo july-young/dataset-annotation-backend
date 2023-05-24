@@ -3,7 +3,7 @@ package org.dubhe.admin.enums;
 
 /**
  * @description 节点枚举类
- * @date 2020-07-08
+
  */
 public enum SystemNodeEnum {
     /**

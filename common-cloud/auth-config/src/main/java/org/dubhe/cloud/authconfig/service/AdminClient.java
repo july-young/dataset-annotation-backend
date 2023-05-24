@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * @description admin远程服务调用类
- * @date 2020-12-10
+
  */
 @FeignClient(value = ApplicationNameConst.SERVER_ADMIN,fallback = AdminClientFallback.class)
 public interface AdminClient {

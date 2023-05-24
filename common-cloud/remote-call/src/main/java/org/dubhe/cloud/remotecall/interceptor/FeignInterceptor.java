@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * @description Feign请求拦截器
- * @date 2020-11-19
+
  */
 @Configuration
 public class FeignInterceptor implements RequestInterceptor {

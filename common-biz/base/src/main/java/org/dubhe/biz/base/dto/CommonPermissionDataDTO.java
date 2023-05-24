@@ -9,7 +9,7 @@ import java.util.Set;
 
 /**
  * @description 公共权限信息DTO
- * @date 2020-11-25
+
  */
 @Data
 @Builder

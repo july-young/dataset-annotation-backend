@@ -17,7 +17,7 @@ import javax.annotation.Resource;
 
 /**
  * @description 邮箱事件监听
- * @date 2020-06-01
+
  */
 @Component
 public class EmailEventListener {

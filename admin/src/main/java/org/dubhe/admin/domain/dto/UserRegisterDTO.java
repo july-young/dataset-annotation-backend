@@ -15,7 +15,7 @@ import java.io.Serializable;
 
 /**
  * @description 用户注册请求实体
- * @date 2020-06-01
+
  */
 @Data
 @AllArgsConstructor

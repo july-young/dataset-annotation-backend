@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
 
 /**
  * @description 接口枚举类检测标注类
- * @date 2020-05-21
+
  */
 @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE })
 @Retention(RetentionPolicy.RUNTIME)

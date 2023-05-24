@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * @description 网关异常全局配置
- * @date 2020-12-23
+
  */
 @Configuration
 public class GlobalExceptionConfig {

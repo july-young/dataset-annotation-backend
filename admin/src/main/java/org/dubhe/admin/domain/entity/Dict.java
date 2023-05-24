@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * @description 字典实体
- * @date 2020-06-01
+
  */
 @Data
 @TableName("dict")

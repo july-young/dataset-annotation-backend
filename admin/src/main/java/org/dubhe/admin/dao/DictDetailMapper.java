@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * @description  字典详情 mapper
- * @date 2020-03-26
+
  */
 public interface DictDetailMapper extends BaseMapper<DictDetail> {
 

@@ -8,7 +8,7 @@ import org.dubhe.biz.base.constant.ResponseCode;
 
 /**
  * @description DataResponseBody 工厂类
- * @date 2020-05-28
+
  */
 public class DataResponseFactory {
 

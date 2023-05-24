@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * @description ES数据查询DTO
- * @date 2020-03-24
+
  */
 @Data
 public class EsDataFileDTO implements Serializable {

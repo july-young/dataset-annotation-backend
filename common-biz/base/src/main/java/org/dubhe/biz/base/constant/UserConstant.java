@@ -5,7 +5,7 @@ package org.dubhe.biz.base.constant;
 
 /**
  * @description 用户常量类
- * @date 2020-06-01
+
  */
 public class UserConstant {
 

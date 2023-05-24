@@ -13,7 +13,7 @@ import java.util.Objects;
 
 /**
  * @description 菜单修改 dto
- * @date 2020-06-29
+
  */
 @Data
 public class MenuUpdateDTO implements Serializable {

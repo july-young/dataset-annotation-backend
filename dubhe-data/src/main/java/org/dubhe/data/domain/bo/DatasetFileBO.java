@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * @description 数据集文件Bo
- * @date 2020-06-28
+
  */
 @Data
 public class DatasetFileBO implements Serializable {

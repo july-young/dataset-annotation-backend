@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 /**
  * @description 字典详情查询实体
- * @date 2020-06-01
+
  */
 @Data
 public class DictDetailQueryDTO implements Serializable {

@@ -19,7 +19,7 @@ import java.util.Objects;
 
 /**
  * @description 权限不足处理类
- * @date 2020-12-21
+
  */
 @Component
 public class CustomerAccessDeniedHandler implements AccessDeniedHandler {

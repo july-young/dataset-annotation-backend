@@ -10,7 +10,7 @@ import lombok.Data;
 
 /**
  * @description 序列表
- * @date 2020-09-23
+
  */
 @Data
 @TableName("data_sequence")

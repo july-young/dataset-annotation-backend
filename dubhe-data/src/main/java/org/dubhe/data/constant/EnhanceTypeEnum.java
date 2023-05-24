@@ -4,7 +4,7 @@ package org.dubhe.data.constant;
 
 /**
  * @description 增强算法枚举
- * @date 2020-06-30
+
  */
 public enum EnhanceTypeEnum {
 

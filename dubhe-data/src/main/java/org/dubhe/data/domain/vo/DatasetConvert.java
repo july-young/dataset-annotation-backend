@@ -13,7 +13,7 @@ import org.mapstruct.ReportingPolicy;
 
 /**
  * @description 数据集转换
- * @date 2020-04-10
+
  */
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface DatasetConvert extends BaseConvert<DatasetVO, Dataset> {

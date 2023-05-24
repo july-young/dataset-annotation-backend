@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 
 /**
  * @description 数据权限方法注解
- * @date 2020-11-25
+
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

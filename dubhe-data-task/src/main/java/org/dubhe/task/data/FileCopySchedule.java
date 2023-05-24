@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @description 已发布版本文件复制定时任务
- * @date 2020-06-18
+
  */
 @Component
 public class FileCopySchedule {

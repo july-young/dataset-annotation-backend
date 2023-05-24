@@ -2,7 +2,7 @@ package org.dubhe.admin.dao.provider;
 
 /**
  * @description  角色构建类
- * @date 2020-04-15
+
  */
 public class RoleProvider {
     public String findRolesByUserId(Long userId) {

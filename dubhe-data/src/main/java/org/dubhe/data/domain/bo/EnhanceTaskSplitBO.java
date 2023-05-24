@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Tianshu AI Platform. All Rights Reserved.
+
  *
  * Licensed un   der the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import java.util.Map;
 
 /**
  * @description 增强任务拆分BO
- * @date 2020-06-28
+
  */
 @Data
 public class EnhanceTaskSplitBO implements Serializable {

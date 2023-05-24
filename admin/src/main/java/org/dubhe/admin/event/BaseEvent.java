@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationEvent;
 
 /**
  * @description 超类 事件
- * @date 2020-06-01
+
  */
 public abstract class BaseEvent<T> extends ApplicationEvent {
 

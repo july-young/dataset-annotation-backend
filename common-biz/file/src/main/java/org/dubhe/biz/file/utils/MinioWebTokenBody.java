@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * @description Minio web访问token实体
- * @date 2020-05-09
+
  */
 @Data
 @Service

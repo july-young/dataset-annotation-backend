@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * @description feign 异常处理类
- * @date 2020-12-21
+
  */
 
 @Configuration

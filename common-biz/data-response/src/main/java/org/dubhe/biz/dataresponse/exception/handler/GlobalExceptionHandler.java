@@ -25,7 +25,7 @@ import java.util.Objects;
 
 /**
  * @description 全局异常处理器
- * @date 2020-02-23
+
  */
 @Slf4j
 @RestControllerAdvice

@@ -25,7 +25,7 @@ import java.util.Map;
 
 /**
  * @description 授权接口类
- * @date 2020-11-03
+
  */
 @RestController
 @RequestMapping(value = "/oauth")

@@ -6,7 +6,7 @@ import lombok.Getter;
 
 /**
  * @description 算法枚举类
- * @date 2020-05-12
+
  */
 @Getter
 public enum AlgorithmSourceEnum {

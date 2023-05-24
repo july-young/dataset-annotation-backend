@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @description 未采样状态类
- * @date 2020-08-27
+
  */
 @Component
 public class NotSampledState extends AbstractDataState {

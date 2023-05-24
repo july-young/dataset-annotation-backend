@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * @description admin远程服务调用类熔断
- * @date 2020-12-10
+
  */
 @Component
 public class AdminClientFallback implements AdminClient {

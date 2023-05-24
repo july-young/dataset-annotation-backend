@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @description 增强中状态
- * @date 2020-08-27
+
  */
 @Component
 public class StrengtheningState extends AbstractDataState {

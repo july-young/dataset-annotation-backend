@@ -19,7 +19,7 @@ import java.io.Serializable;
 
 /**
  * @description 数据状态机
- * @date 2020-08-27
+
  */
 @Data
 @Component

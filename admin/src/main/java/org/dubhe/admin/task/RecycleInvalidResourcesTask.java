@@ -12,7 +12,7 @@ import java.io.File;
 
 /**
  * @description 回收无效文件资源定时任务
- * @date 2020-09-21
+
  */
 @Component
 public class RecycleInvalidResourcesTask {

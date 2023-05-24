@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @description 获取序列服务接口实现
- * @date 2020-09-23
+
  */
 @Service
 public class DataSequenceServiceImpl implements DataSequenceService {

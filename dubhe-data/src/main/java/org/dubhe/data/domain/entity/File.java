@@ -13,7 +13,7 @@ import java.util.Objects;
 
 /**
  * @description 文件信息
- * @date 2020-04-10
+
  */
 @Builder
 @Getter

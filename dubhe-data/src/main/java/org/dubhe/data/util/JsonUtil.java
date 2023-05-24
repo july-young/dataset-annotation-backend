@@ -7,7 +7,7 @@ import org.dubhe.biz.base.utils.StringUtils;
 
 /**
  * @description 校验字符串是否是 json 格式 工具类
- * @date 2020-10-16
+
  */
 public class JsonUtil {
 

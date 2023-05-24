@@ -10,7 +10,7 @@ import java.io.Serializable;
 
 /**
  * @description 菜单新增 dto
- * @date 2020-06-29
+
  */
 @Data
 public class MenuCreateDTO implements Serializable {

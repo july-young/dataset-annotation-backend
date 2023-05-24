@@ -4,7 +4,7 @@ package org.dubhe.biz.base.constant;
 
 /**
  * @description  业务返回状态码
- * @date 2020-02-23
+
  */
 public class ResponseCode {
     public static Integer SUCCESS = 200;

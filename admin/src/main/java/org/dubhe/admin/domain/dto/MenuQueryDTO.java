@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * @description 菜单查询实体类
- * @date 2020-06-01
+
  */
 @Data
 public class MenuQueryDTO {

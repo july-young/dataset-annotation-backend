@@ -6,7 +6,7 @@ import lombok.Getter;
 
 /**
  * @description 数据类型
- * @date 2020-05-21
+
  */
 @Getter
 public enum DatatypeEnum {

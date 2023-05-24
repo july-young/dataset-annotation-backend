@@ -3,7 +3,7 @@ package org.dubhe.data.machine.constant;
 
 /**
  * @description 状态机异常量类
- * @date 2020-09-01
+
  */
 public class ErrorMessageConstant {
 

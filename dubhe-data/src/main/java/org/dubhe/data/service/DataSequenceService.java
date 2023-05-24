@@ -6,7 +6,7 @@ import org.dubhe.data.domain.entity.DataSequence;
 
 /**
  * @description 获取序列服务接口
- * @date 2020-09-23
+
  */
 public interface DataSequenceService {
     /**

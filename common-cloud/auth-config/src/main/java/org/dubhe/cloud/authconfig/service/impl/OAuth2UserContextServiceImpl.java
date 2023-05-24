@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * @description OAuth2 当前信息获取实现类
- * @date 2020-12-07
+
  */
 @Service(value = "oAuth2UserContextServiceImpl")
 public class OAuth2UserContextServiceImpl implements UserContextService {

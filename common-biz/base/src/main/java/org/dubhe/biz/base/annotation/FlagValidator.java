@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 /**
  * @description 自定义状态校验注解(传入值是否在指定状态范围内)
- * @date 2020-09-18
+
  */
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
@@ -28,7 +28,7 @@ public @interface FlagValidator {
 
     /**
      * @description 校验传入值是否在默认值范围校验逻辑
-     * @date 2020-09-18
+
      */
     class Validator implements ConstraintValidator<FlagValidator, Integer> {
 

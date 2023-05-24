@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * @description 节点实体类
- * @date 2020-06-03
+
  */
 @Data
 public class NodeDTO {

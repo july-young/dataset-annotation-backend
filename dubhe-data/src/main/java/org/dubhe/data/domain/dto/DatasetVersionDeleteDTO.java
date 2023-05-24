@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 /**
  * @description 删除数据集版本参数
- * @date 2020-07-09
+
  */
 @Data
 public class DatasetVersionDeleteDTO implements Serializable {

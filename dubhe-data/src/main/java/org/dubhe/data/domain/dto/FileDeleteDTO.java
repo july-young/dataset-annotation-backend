@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * @description 删除文件
- * @date 2020-07-09
+
  */
 @Data
 public class FileDeleteDTO implements Serializable {

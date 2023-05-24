@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @description 采样中状态类
- * @date 2020-08-27
+
  */
 @Component
 public class SamplingState extends AbstractDataState {

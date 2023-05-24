@@ -8,7 +8,7 @@ import java.util.Map;
 
 /**
  * @description ofRecord任务详情
- * @date 2020-09-04
+
  */
 @Data
 public class OfRecordTaskDto {

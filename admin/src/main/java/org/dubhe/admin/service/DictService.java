@@ -16,7 +16,7 @@ import java.util.Set;
 
 /**
  * @description 字典服务 Service
- * @date 2020-06-01
+
  */
 public interface DictService {
 

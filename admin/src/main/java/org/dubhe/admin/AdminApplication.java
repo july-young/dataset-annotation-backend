@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * @description Admin启动类
- * @date 2020-12-02
+
  */
 @SpringBootApplication(scanBasePackages = "org.dubhe")
 @MapperScan(basePackages = {"org.dubhe.**.dao"})

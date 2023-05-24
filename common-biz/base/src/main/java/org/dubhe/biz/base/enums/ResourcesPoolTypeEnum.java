@@ -3,7 +3,7 @@ package org.dubhe.biz.base.enums;
 
 /**
  * @description 规格类型
- * @date 2020-07-15
+
  */
 public enum ResourcesPoolTypeEnum {
 

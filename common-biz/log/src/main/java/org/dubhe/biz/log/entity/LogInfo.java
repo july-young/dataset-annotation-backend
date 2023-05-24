@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 /**
  * @description 日志对象封装类
- * @date 2020-06-29
+
  */
 @Data
 @Accessors(chain = true)

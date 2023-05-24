@@ -7,7 +7,7 @@ import org.dubhe.admin.domain.dto.EmailDTO;
 
 /**
  * @description 邮件事件
- * @date 2020-06-01
+
  */
 public class EmailEvent extends BaseEvent<EmailDTO> {
 

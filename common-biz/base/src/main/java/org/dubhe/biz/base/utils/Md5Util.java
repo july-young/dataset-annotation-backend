@@ -6,7 +6,7 @@ import java.security.MessageDigest;
 
 /**
  * @description md5工具类
- * @date 2020-06-29
+
  */
 public class Md5Util {
     public static final String CHARSET = "UTF-8";

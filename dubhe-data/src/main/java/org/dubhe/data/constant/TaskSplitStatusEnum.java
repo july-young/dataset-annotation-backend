@@ -6,7 +6,7 @@ import lombok.Getter;
 
 /**
  * @description 任务分片状态
- * @date 2020-04-10
+
  */
 @Getter
 public enum TaskSplitStatusEnum {

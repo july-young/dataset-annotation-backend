@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * @description 文件信息 Mapper 接口
- * @date 2020-04-10
+
  */
 @DataPermission(ignoresMethod = {"insert", "getOneById", "selectFile"})
 public interface FileMapper extends BaseMapper<File> {

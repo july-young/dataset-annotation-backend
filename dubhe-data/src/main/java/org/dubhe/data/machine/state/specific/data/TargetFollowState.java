@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @description 目标跟踪中状态类
- * @date 2020-09-03
+
  */
 @Component
 public class TargetFollowState extends AbstractDataState {

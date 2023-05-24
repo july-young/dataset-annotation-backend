@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @description 垃圾回收机制配置常量
- * @date 2020-09-21
+
  */
 @Data
 @Component

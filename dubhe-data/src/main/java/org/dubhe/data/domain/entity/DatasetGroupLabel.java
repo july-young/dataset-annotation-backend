@@ -13,7 +13,7 @@ import java.io.Serializable;
 
 /**
  * @description 数据集标签标签组关系表
- * @date 2020-04-17
+
  */
 @Data
 @NoArgsConstructor

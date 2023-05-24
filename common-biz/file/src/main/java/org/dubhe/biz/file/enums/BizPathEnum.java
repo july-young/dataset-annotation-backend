@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * @description 业务NFS路径枚举
- * @date 2020-05-13
+
  */
 public enum BizPathEnum {
     /**

@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @description 自动标注完成类
- * @date 2020-08-27
+
  */
 @Component
 public class AutoTagCompleteState extends AbstractDataState {

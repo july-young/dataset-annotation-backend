@@ -3,7 +3,7 @@ package org.dubhe.data.machine.constant;
 
 /**
  * @description 文件状态事件常量
- * @date 2020-08-31
+
  */
 public class FileStateMachineConstant {
 

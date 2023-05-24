@@ -6,7 +6,7 @@ import org.dubhe.biz.base.exception.BusinessException;
 
 /**
  * @description 状态机异常类
- * @date 2020-08-27
+
  */
 @Getter
 public class StateMachineException extends BusinessException {

@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * @description 镜像项目枚举类
- * @date 2020-12-11
+
  */
 @Getter
 public enum ImageTypeEnum {

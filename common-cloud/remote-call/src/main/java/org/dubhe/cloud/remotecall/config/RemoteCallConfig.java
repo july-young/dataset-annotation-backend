@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * @description 远程调用默认配置
- * @date 2020-12-11
+
  */
 @Configuration
 @EnableFeignClients(basePackages = "org.dubhe")

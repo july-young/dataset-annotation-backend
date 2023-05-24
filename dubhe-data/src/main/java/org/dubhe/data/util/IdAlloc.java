@@ -10,7 +10,7 @@ import java.util.Queue;
 
 /**
  * @description 表ID值存储
- * @date 2020-10-16
+
  */
 @Data
 public class IdAlloc {

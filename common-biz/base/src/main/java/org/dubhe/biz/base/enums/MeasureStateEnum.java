@@ -4,7 +4,7 @@ package org.dubhe.biz.base.enums;
 
 /**
  * @description 度量文件生成状态
- * @date 2020-07-15
+
  **/
 public enum MeasureStateEnum {
 

@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * @description RestTemplate token拦截处理器
- * @date 2020-11-26
+
  */
 public class RestTemplateTokenInterceptor implements ClientHttpRequestInterceptor {
 

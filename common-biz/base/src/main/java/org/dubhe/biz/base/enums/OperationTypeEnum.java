@@ -6,7 +6,7 @@ import lombok.Getter;
 
 /**
  * @description 操作类型枚举
- * @date 2020-11-25
+
  */
 @Getter
 public enum OperationTypeEnum {

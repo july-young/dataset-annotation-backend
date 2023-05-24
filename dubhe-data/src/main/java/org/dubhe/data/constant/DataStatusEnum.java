@@ -6,7 +6,7 @@ import lombok.Getter;
 
 /**
  * @description 数据(文件)状态(是否删除状态)
- * @date 2020-06-03
+
  */
 @Getter
 public enum DataStatusEnum {

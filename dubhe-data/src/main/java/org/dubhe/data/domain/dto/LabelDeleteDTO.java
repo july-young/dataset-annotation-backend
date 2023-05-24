@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 /**
  * @description 删除标签组
- * @date 2020-09-23
+
  */
 @Data
 public class LabelDeleteDTO implements Serializable {

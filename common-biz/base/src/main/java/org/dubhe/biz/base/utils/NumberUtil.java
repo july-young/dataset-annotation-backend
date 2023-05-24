@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 /**
  * @description 数字验证工具
- * @date 2020-05-18
+
  */
 public class NumberUtil {
 

@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 /**
  * @description 常量
- * @date 2020-04-10
+
  */
 public class Constant {
 

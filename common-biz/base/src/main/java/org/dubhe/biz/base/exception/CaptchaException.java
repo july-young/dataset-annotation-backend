@@ -8,7 +8,7 @@ import org.dubhe.biz.base.vo.DataResponseBody;
 
 /**
  * @description  验证码异常
- * @date 2020-02-23
+
  */
 @Getter
 public class CaptchaException extends RuntimeException {

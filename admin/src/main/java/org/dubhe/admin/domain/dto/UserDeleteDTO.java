@@ -11,7 +11,7 @@ import java.util.Set;
 
 /**
  * @description 用户删除 dto
- * @date 2020-06-29
+
  */
 @Data
 public class UserDeleteDTO implements Serializable {

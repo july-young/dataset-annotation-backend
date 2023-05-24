@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * @description 邮件DTO
- * @date 2020-06-01
+
  */
 @Data
 @Builder

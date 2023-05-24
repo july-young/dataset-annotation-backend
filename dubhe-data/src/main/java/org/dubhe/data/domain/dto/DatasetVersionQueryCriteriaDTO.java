@@ -15,7 +15,7 @@ import java.io.Serializable;
 
 /**
  * @description 数据集版本查询
- * @date 2020-05-25
+
  */
 @Data
 public class DatasetVersionQueryCriteriaDTO extends PageQueryBase implements Serializable{

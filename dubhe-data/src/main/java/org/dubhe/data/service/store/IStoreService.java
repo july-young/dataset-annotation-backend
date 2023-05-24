@@ -4,7 +4,7 @@ package org.dubhe.data.service.store;
 
 /**
  * @description 文件存储
- * @date 2020-05-09
+
  */
 public interface IStoreService {
 

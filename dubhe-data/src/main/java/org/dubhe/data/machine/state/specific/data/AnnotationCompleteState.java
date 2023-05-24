@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @description 标注完成状态类
- * @date 2020-08-27
+
  */
 @Component
 public class AnnotationCompleteState extends AbstractDataState {

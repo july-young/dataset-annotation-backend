@@ -20,7 +20,7 @@ import java.util.Objects;
 
 /**
  * @description token无效处理类
- * @date 2020-12-21
+
  */
 @Component
 public class CustomerTokenExceptionEntryPoint extends OAuth2AuthenticationEntryPoint {

@@ -20,7 +20,7 @@ import java.util.UUID;
 
 /**
  * @description 日志工具类
- * @date 2020-06-29
+
  */
 @Slf4j
 public class LogUtil {

@@ -72,7 +72,7 @@
         <ffmpeg-platform.version>4.0.2-1.4.3</ffmpeg-platform.version>
         <easyexcel>2.2.8</easyexcel>
         <javacsv>2.0</javacsv>
-        <!-- 自定义tomcat版本，修复 tomcatbug CVE-2020-17527-->
+
         <tomcat.version>9.0.41</tomcat.version>
         <okhttp.version>3.14.9</okhttp.version>
 

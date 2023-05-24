@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @description 全局状态机
- * @date 2020-08-27
+
  */
 @Data
 @Component

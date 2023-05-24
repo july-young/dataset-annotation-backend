@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * @description 用户修改DTO
- * @date 2020-06-29
+
  */
 @Data
 public class UserUpdateDTO implements Serializable {

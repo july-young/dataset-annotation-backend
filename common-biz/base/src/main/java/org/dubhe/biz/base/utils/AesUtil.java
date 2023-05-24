@@ -14,7 +14,7 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * @description AES加解密工具
- * @date 2020-06-01
+
  */
 public class AesUtil {
 

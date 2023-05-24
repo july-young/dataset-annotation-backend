@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @description 重写Hystrix参数传递并发处理战略，保证授权token传递
  * 参考 org.springframework.cloud.sleuth.instrument.hystrix.SleuthHystrixConcurrencyStrategy
- * @date 2020-11-26
+
  */
 @Slf4j
 @Component

@@ -3,7 +3,7 @@ package org.dubhe.biz.base.constant;
 
 /**
  * @description 服务名常量类 spring.application.name
- * @date 2020-11-05
+
  */
 public class ApplicationNameConst {
     private ApplicationNameConst() {
