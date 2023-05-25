@@ -15,7 +15,6 @@ import org.dubhe.admin.enums.MenuTypeEnum;
 import org.dubhe.admin.service.MenuService;
 import org.dubhe.admin.service.RoleService;
 import org.dubhe.admin.service.convert.MenuConvert;
-import org.dubhe.biz.base.enums.SwitchEnum;
 import org.dubhe.biz.base.exception.BusinessException;
 import org.dubhe.biz.base.utils.StringUtils;
 import org.dubhe.biz.db.constant.PermissionConstant;
@@ -71,8 +70,7 @@ public class MenuServiceImpl implements MenuService {
     public MenuDTO findById(long id) {
 
         Menu menu = menuMapper.selectOne(
-                new LambdaQueryWrapper<Menu>().eq(Menu::getId, id).eq(Menu::getDeleted,
-                        SwitchEnum.getBooleanValue(SwitchEnum.OFF.getValue()))
+                new LambdaQueryWrapper<Menu>().eq(Menu::getId, id).eq(Menu::getDeleted,false)
         );
         return menuConvert.toDto(menu);
     }
@@ -149,7 +147,7 @@ public class MenuServiceImpl implements MenuService {
         Menu menu = menuMapper.selectOne(
                 new LambdaQueryWrapper<Menu>()
                         .eq(Menu::getId, resources.getId())
-                        .eq(Menu::getDeleted, SwitchEnum.getBooleanValue(SwitchEnum.OFF.getValue()))
+                        .eq(Menu::getDeleted, false)
         );
         if (MenuTypeEnum.LINK_TYPE.getValue().equals(resources.getType())) {
             String http = "http://", https = "https://";

@@ -4,8 +4,6 @@ package org.dubhe.biz.base.exception;
 
 import lombok.Getter;
 import org.dubhe.biz.base.constant.ResponseCode;
-import org.dubhe.biz.base.enums.BaseErrorCodeEnum;
-import org.dubhe.biz.base.vo.DataResponseBody;
 
 /**
  * @description 业务异常

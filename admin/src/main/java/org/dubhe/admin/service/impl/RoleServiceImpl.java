@@ -19,7 +19,6 @@ import org.dubhe.admin.service.convert.RoleConvert;
 import org.dubhe.admin.service.convert.RoleSmallConvert;
 import org.dubhe.biz.base.constant.UserConstant;
 import org.dubhe.biz.base.enums.BaseErrorCodeEnum;
-import org.dubhe.biz.base.enums.SwitchEnum;
 import org.dubhe.biz.base.exception.BusinessException;
 import org.dubhe.biz.db.utils.PageDTO;
 import org.dubhe.biz.db.utils.PageUtil;
@@ -193,7 +192,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
                 roleMapper.updateById(
                         Role.builder()
                                 .id(id)
-                                .deleted(SwitchEnum.getBooleanValue(SwitchEnum.ON.getValue())).build()
+                                .deleted(false).build()
                 );
             }
 

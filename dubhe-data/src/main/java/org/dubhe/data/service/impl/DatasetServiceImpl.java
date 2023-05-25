@@ -246,19 +246,6 @@ public class DatasetServiceImpl extends ServiceImpl<DatasetMapper, Dataset> impl
     private GeneratorKeyUtil generatorKeyUtil;
 
     /**
-     * 线程池
-     */
-    @Autowired
-    private BasePool pool;
-
-    @Value("${storage.file-store}")
-    private String nfsIp;
-
-    @Value("${data.server.userName}")
-    private String userName;
-
-
-    /**
      * 检测是否为公共数据集
      *
      * @param id 数据集id

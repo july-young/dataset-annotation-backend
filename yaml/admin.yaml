@@ -33,10 +33,5 @@ ribbon:
 debug:
   flag: true
 
-# 见微-公私（自行生成）
-vis:
-  public_key: 123456
-
-  
 logging:
   config: classpath:logback-spring.xml

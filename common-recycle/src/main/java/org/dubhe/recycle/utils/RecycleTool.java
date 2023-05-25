@@ -57,12 +57,6 @@ public class RecycleTool {
     @Resource(name = "hostFileStoreApiImpl")
     private FileStoreApi fileStoreApi;
 
-    @Value("${storage.file-store}")
-    private String ip;
-
-    @Value("${data.server.userName}")
-    private String userName;
-
     /**
      * 资源回收授权token
      */

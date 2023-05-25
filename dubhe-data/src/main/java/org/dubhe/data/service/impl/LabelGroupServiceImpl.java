@@ -16,7 +16,6 @@ import org.dubhe.biz.base.constant.NumberConstant;
 import org.dubhe.biz.base.context.DataContext;
 import org.dubhe.biz.base.dto.CommonPermissionDataDTO;
 import org.dubhe.biz.base.enums.DatasetTypeEnum;
-import org.dubhe.biz.base.enums.SwitchEnum;
 import org.dubhe.biz.base.exception.BusinessException;
 import org.dubhe.biz.base.utils.RandomUtil;
 import org.dubhe.biz.base.utils.StringUtils;
@@ -673,7 +672,7 @@ public class LabelGroupServiceImpl extends ServiceImpl<LabelGroupMapper, LabelGr
         LabelGroup labelGroup = baseMapper.selectOne(
                 new LambdaQueryWrapper<LabelGroup>()
                         .eq(LabelGroup::getName, name)
-                        .eq(LabelGroup::getDeleted, SwitchEnum.getBooleanValue(SwitchEnum.OFF.getValue()))
+                        .eq(LabelGroup::getDeleted, false)
         );
 
         return !Objects.isNull(labelGroup);

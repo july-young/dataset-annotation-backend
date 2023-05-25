@@ -31,14 +31,12 @@ import org.dubhe.biz.base.constant.UserConstant;
 import org.dubhe.biz.base.context.UserContext;
 import org.dubhe.biz.base.dto.*;
 import org.dubhe.biz.base.enums.BaseErrorCodeEnum;
-import org.dubhe.biz.base.enums.SwitchEnum;
 import org.dubhe.biz.base.exception.BusinessException;
 import org.dubhe.biz.base.exception.CaptchaException;
 import org.dubhe.biz.base.utils.DateUtil;
 import org.dubhe.biz.base.utils.RandomUtil;
 import org.dubhe.biz.base.utils.RsaEncrypt;
 import org.dubhe.biz.base.vo.DataResponseBody;
-import org.dubhe.biz.dataresponse.factory.DataResponseFactory;
 import org.dubhe.biz.db.utils.PageDTO;
 import org.dubhe.biz.db.utils.PageUtil;
 import org.dubhe.biz.db.utils.WrapperHelp;
@@ -93,9 +91,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Value("${user.config.gpu-limit}")
     private Integer gpuLimit;
-
-    @Value("${vis.public_key}")
-    private String visPublicKey;
 
     @Autowired
     private UserMapper userMapper;

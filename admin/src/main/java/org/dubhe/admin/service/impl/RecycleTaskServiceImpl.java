@@ -76,12 +76,6 @@ public class RecycleTaskServiceImpl implements RecycleTaskService {
     @Resource(name = "hostFileStoreApiImpl")
     private FileStoreApi fileStoreApi;
 
-    @Value("${storage.file-store}")
-    private String ip;
-
-    @Value("${data.server.userName}")
-    private String userName;
-
     /**
      * 资源回收单次执行任务数量限制（默认10000）
      */
